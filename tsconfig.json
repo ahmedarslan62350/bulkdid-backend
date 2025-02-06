@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ESNext", 
+    "module": "CommonJS",
+    "lib": ["ESNext", "DOM"],
+    "strict": true,
+    "allowJs": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "moduleResolution": "Node",
+    "outDir": "./dist",
+    "rootDir": ".",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noImplicitAny": true,
+    "sourceMap": true
+  },
+  "include": ["src" , "test"],
+  "exclude": ["node_modules", "dist"]
+}
