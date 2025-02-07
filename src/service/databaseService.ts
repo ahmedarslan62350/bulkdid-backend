@@ -5,7 +5,7 @@ export default {
     connect: async () => {
         try {
             await mongoose.connect(config.DATABASE_URL as string, {
-                dbName: 'nodejs-production-setup',
+                dbName: config.DATABASE_NAME as string,
             })
             return mongoose.connection
         } catch (error) {

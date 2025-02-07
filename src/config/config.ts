@@ -10,7 +10,8 @@ export default {
 
     // DATABASE
     DATABASE_URL: process.env.DATABASE_URL,
-
+    DATABASE_NAME: process.env.DATABASE_NAME,
+    
     // APPLICATION
     JWT_TOKEN: process.env.JWT_TOKEN,
 
