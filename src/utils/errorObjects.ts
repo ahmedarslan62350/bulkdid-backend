@@ -11,7 +11,7 @@ export default (error: Error | unknown, req: Request, errorStatusCode: number = 
     const errorObj: THttpError = {
         success: false,
         status: errorStatusCode,
-        message: error instanceof Error ? error.message : responseMessage.ERROR,
+        message: error instanceof Error ? error.message : responseMessage.UNPROCESSABLE_ENTITY.message,
         trace: error instanceof Error ? { error: error.stack } : null,
         request: {
             ip: req.ip || null,

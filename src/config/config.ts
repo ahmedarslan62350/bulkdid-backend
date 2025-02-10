@@ -7,15 +7,26 @@ export default {
     ENV: process.env.ENV,
     PORT: process.env.PORT,
     SERVER_URL: process.env.SERVER_URL,
+    FRONTEND_URL: process.env.FRONTEND_URL,
 
     // DATABASE
     DATABASE_URL: process.env.DATABASE_URL,
     DATABASE_NAME: process.env.DATABASE_NAME,
-    
+
     // APPLICATION
     JWT_TOKEN: process.env.JWT_TOKEN,
+    JWT_REFRESH_TOKEN_EXPIRATION_TIME: process.env.JWT_REFRESH_TOKEN_EXPIRATION_TIME,
 
     // RATE_LIMITING
     POINTS_PER_SECOND: process.env.POINTS_PER_SECOND,
-    DURATION: process.env.DURATION
+    DURATION: process.env.DURATION,
+
+    // NODE_MAILER
+    MAILER_SECURE: process.env.NODE_MAILER_SECURE,
+    MAILER_PORT: process.env.NODE_MAILER_PORT,
+    MAILER_USER: process.env.NODE_MAILER_USER,
+    MAILER_PASSWORD: process.env.NODE_MAILER_PASS,
+
+    // OTHERS
+    ADMIN_EMAIL: process.env.ADMIN_EMAIL
 }

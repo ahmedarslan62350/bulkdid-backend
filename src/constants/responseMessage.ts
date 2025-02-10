@@ -1,9 +1,30 @@
 export default {
-    SUCCESS: `The operation has been successful`,
-    ERROR: `An error occurred during the operation`,
-    NOT_FOUND: (entity: string) => `The requested ${entity} was not found`,
-    UNAUTHORIZED: `You are not authorized to perform this action`,
-    FORBIDDEN: `You are forbidden to perform this action`,
-    CONFLICT: `The requested resource already exists`,
-    TOO_MANY_REQUESTS: `The requested resource is unavailable , due to too many requests`
+    SUCCESS: { code: 200, message: `The operation has been successful` },
+    CREATED: { code: 201, message: `The resource has been successfully created` },
+    ACCEPTED: { code: 202, message: `The request has been accepted for processing` },
+    NO_CONTENT: { code: 204, message: `No content available` },
+    BAD_REQUEST: { code: 400, message: `The request was invalid or cannot be served` },
+    UNAUTHORIZED: { code: 401, message: `You are not authorized to perform this action` },
+    FORBIDDEN: { code: 403, message: `You are forbidden to perform this action` },
+    NOT_FOUND: { code: 404, message: (entity: string) => `The requested ${entity} was not found` },
+    CONFLICT: { code: 409, message: `The requested resource already exists` },
+    UNPROCESSABLE_ENTITY: { code: 422, message: `The request was well-formed but could not be followed due to semantic errors` },
+    TOO_MANY_REQUESTS: { code: 429, message: `The requested resource is unavailable due to too many requests` },
+    INTERNAL_SERVER_ERROR: { code: 500, message: `An error occurred on the server` },
+    NOT_IMPLEMENTED: { code: 501, message: `The requested functionality is not implemented on the server` },
+    BAD_GATEWAY: { code: 502, message: `The server received an invalid response from the upstream server` },
+    SERVICE_UNAVAILABLE: { code: 503, message: `The server is currently unable to handle the request` },
+    GATEWAY_TIMEOUT: { code: 504, message: `The server did not receive a timely response from the upstream server` },
+    VALIDATION_ERROR: {
+        EMAIL_INVALID: `The provided email address is invalid`,
+        PASSWORD_WEAK: `The password is too weak. Please use a stronger password`,
+        USERNAME_TAKEN: `The username is already in use. Please choose another`,
+        PHONE_INVALID: `The provided phone number is invalid`,
+        LESS_DATA: `Please enter full data in the field`,
+        PASSWORD_MISMATCH: `Passwords do not match`,
+        EMAIL_ALREADY_EXISTS:`Email address already exists`,
+        INVALID_ENTITY:`Invalid entity provided`,
+        FIELD_TOO_LONG: (field: string, limit: number) => `The field '${field}' exceeds the maximum allowed length of ${limit} characters`,
+        FIELD_TOO_SHORT: (field: string, limit: number) => `The field '${field}' must be at least ${limit} characters long`
+    }
 }

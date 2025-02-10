@@ -3,14 +3,15 @@ import httpResponse from '../utils/httpResponse'
 import responseMessage from '../constants/responseMessage'
 import httpError from '../utils/httpError'
 import quicker from '../utils/quicker'
+import register from './auth/register'
 
 export default {
     self: (req: Request, res: Response, NextFn: NextFunction) => {
         try {
             // throw new Error('this is error')
-             httpResponse(req, res, 200, responseMessage.SUCCESS, { imageUrl: 'http://localhost:8080/images' })
+            httpResponse(req, res, responseMessage.SUCCESS.code, responseMessage.SUCCESS.message, { imageUrl: 'http://localhost:8080/images' })
         } catch (error) {
-             httpError(NextFn, error, req, 500)
+            httpError(NextFn, error, req, 500)
         }
     },
 
@@ -19,9 +20,10 @@ export default {
             const systemHealth = quicker.getSystemDetails()
             const applicationHealth = quicker.getApplicationDetails()
 
-             httpResponse(req, res, 200, responseMessage.SUCCESS, { systemHealth, applicationHealth })
+            httpResponse(req, res, responseMessage.SUCCESS.code, responseMessage.SUCCESS.message, { systemHealth, applicationHealth })
         } catch (error) {
-             httpError(NextFn, error, req, 500)
+            httpError(NextFn, error, req, responseMessage.INTERNAL_SERVER_ERROR.code)
         }
-    }
+    },
+    register: register
 }

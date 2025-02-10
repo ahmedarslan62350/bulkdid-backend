@@ -12,6 +12,10 @@ export interface IUser extends Document {
     role: 'admin' | 'user'
     walletId: ObjectId
     store: ObjectId
+    verifyCode: number
+    verifyCodeExpiry: Date
+    verifyCodeUsed: number
+    isVerified: boolean
     createdAt?: Date
     updatedAt?: Date
     sessions: [string]
@@ -53,6 +57,21 @@ const userSchema = new Schema<IUser>(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Store',
             required: true
+        },
+        isVerified: {
+            type: Boolean,
+            default: false
+        },
+        verifyCode: {
+            type: Number
+        },
+        verifyCodeExpiry: {
+            type: Date,
+            default: Date.now() + 1000 * parseInt(config.JWT_REFRESH_TOKEN_EXPIRATION_TIME as string)
+        },
+        verifyCodeUsed: {
+            type: Number,
+            default: 0
         }
     },
     { timestamps: true }

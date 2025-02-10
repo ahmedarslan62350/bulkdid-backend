@@ -27,9 +27,9 @@ app.use('/api/v1', router)
 // GLOBAL ERROR HANDLER
 app.use((req: Request, _: Response, NextFn: NextFunction) => {
     try {
-        throw new Error(responseMessage.NOT_FOUND('route'))
+        throw new Error(responseMessage.NOT_FOUND.message('route'))
     } catch (error) {
-        httpError(NextFn, error, req, 404)
+        httpError(NextFn, error, req, responseMessage.UNAUTHORIZED.code)
     }
 })
 
