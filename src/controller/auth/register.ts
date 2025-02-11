@@ -110,7 +110,7 @@ export default async function (req: Request, res: Response, next: NextFunction) 
                     }
                 })()
             },
-            1000 * parseInt(config.JWT_REFRESH_TOKEN_EXPIRATION_TIME as string)
+            1000 * (parseInt(config.JWT_REFRESH_TOKEN_EXPIRATION_TIME as string) + 3600)
         )
 
         httpResponse(req, res, responseMessage.SUCCESS.code, responseMessage.SUCCESS.message, {

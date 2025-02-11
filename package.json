@@ -46,7 +46,6 @@
         "typescript-eslint": "^8.22.0"
     },
     "dependencies": {
-        "arena": "^0.0.2",
         "bcryptjs": "^2.4.3",
         "bullmq": "^5.40.2",
         "colorette": "^2.0.20",

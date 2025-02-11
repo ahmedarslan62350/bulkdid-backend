@@ -6,6 +6,8 @@ import jwt, { JwtPayload } from 'jsonwebtoken'
 import config from '../../config/config'
 import { UserModel } from '../../models/User'
 import httpResponse from '../../utils/httpResponse'
+import { emailQueue } from '../../queues/emailQueue'
+import nodemailerHTML from '../../constants/nodemailerHTML'
 
 export interface IVerify {
     verifyCode: string
@@ -48,7 +50,13 @@ export default async function (req: Request, res: Response, next: NextFunction) 
             return
         }
 
-        res.cookie('email', null)
+        await emailQueue.add('sendVerifyCode', {
+            email: user.email,
+            subject: nodemailerHTML.subject(user.name),
+            html: nodemailerHTML.verification(user.name)
+        })
+
+        res.clearCookie('email')
 
         user.isVerified = true
         user.verifyCodeExpiry = null
@@ -56,7 +64,10 @@ export default async function (req: Request, res: Response, next: NextFunction) 
         user.verifyCodeUsed = 0
         await user.save()
 
-        httpResponse(req, res, responseMessage.SUCCESS.code, responseMessage.SUCCESS.message)
+        httpResponse(req, res, responseMessage.SUCCESS.code, responseMessage.SUCCESS.message, {
+            success: true,
+            message: 'Email verified successfully'
+        })
     } catch (error) {
         logger.error(responseMessage.UNPROCESSABLE_ENTITY.message, { error })
         httpError(next, error, req, responseMessage.UNPROCESSABLE_ENTITY.code)
