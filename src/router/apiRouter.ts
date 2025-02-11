@@ -7,5 +7,6 @@ const router = Router()
 router.route('/self').get(rateLimit , apiController.self)
 router.route('/health').get(apiController.health)
 router.route('/auth/register').post(apiController.register)
+router.route('/auth/verify').post(apiController.verify)
 
 export default router

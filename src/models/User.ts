@@ -12,8 +12,8 @@ export interface IUser extends Document {
     role: 'admin' | 'user'
     walletId: ObjectId
     store: ObjectId
-    verifyCode: number
-    verifyCodeExpiry: Date
+    verifyCode: number | null
+    verifyCodeExpiry: Date | null
     verifyCodeUsed: number
     isVerified: boolean
     createdAt?: Date
@@ -120,7 +120,7 @@ userSchema.methods.generateRefreshToken = async function (): Promise<boolean> {
         }
 
         // eslint-disable-next-line
-        user.refreshToken = await jwt.sign(payload, config.JWT_TOKEN as string, options)
+        user.refreshToken = await jwt.sign(payload, config.JWT_TOKEN_SECRET as string, options)
 
         await user.save()
         return true
@@ -145,7 +145,7 @@ userSchema.methods.generateAccessToken = async function (): Promise<string | nul
         }
 
         // eslint-disable-next-line
-        const token = (await jwt.sign(payload, config.JWT_TOKEN as string, options)) as string
+        const token = (await jwt.sign(payload, config.JWT_TOKEN_SECRET as string, options)) as string
 
         return token
     } catch (error) {

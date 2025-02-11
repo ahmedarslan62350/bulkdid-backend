@@ -4,6 +4,7 @@ import responseMessage from '../constants/responseMessage'
 import httpError from '../utils/httpError'
 import quicker from '../utils/quicker'
 import register from './auth/register'
+import verify from './auth/verify'
 
 export default {
     self: (req: Request, res: Response, NextFn: NextFunction) => {
@@ -25,5 +26,6 @@ export default {
             httpError(NextFn, error, req, responseMessage.INTERNAL_SERVER_ERROR.code)
         }
     },
-    register: register
+    register: register,
+    verify: verify
 }

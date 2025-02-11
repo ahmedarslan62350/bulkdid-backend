@@ -11,6 +11,7 @@ import httpResponse from '../../utils/httpResponse'
 import registerSchema from '../../validations/register.validation'
 import nodeMailerHTML from '../../constants/nodemailerHTML'
 import { emailQueue } from '../../queues/emailQueue'
+import jwt from 'jsonwebtoken'
 
 export interface IRegister {
     email: string
@@ -25,29 +26,34 @@ export default async function (req: Request, res: Response, next: NextFunction) 
         const data = (await req.body) as IRegister
 
         if (!data) {
-            throw new Error(responseMessage.VALIDATION_ERROR.LESS_DATA)
+            httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.VALIDATION_ERROR.LESS_DATA)
+            return
         }
 
         const { email, password, confirmPassword, name, accountNumber } = data
 
         if (!email || !password || !confirmPassword || !name || !accountNumber) {
-            throw new Error(responseMessage.VALIDATION_ERROR.LESS_DATA)
+            httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.VALIDATION_ERROR.LESS_DATA)
+            return
         }
 
         const result = registerSchema.safeParse(data)
 
         if (!result.success) {
-            throw new Error(result.error?.errors[0]?.message)
+            httpResponse(req, res, responseMessage.BAD_REQUEST.code, result.error?.errors[0]?.message)
+            return
         }
 
         if (password !== confirmPassword) {
-            throw new Error(responseMessage.VALIDATION_ERROR.PASSWORD_MISMATCH)
+            httpResponse(req, res, responseMessage.BAD_REQUEST.code,responseMessage.VALIDATION_ERROR.PASSWORD_MISMATCH)
+            return
         }
 
         const user = await UserModel.findOne({ email })
 
         if (user) {
-            throw new Error(responseMessage.VALIDATION_ERROR.EMAIL_ALREADY_EXISTS)
+            httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.VALIDATION_ERROR.EMAIL_ALREADY_EXISTS)
+            return
         }
 
         const hashedPassword = await bcrypt.hash(password, 10)
@@ -84,6 +90,9 @@ export default async function (req: Request, res: Response, next: NextFunction) 
         newUser.walletId = wallet._id
 
         await Promise.all([newUser.save(), wallet.save(), store.save()])
+
+        const header = jwt.sign({ email }, config.JWT_TOKEN_SECRET as string)
+        res.cookie('email', header)
 
         setTimeout(
             () => {

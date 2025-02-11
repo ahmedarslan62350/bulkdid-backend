@@ -6,6 +6,7 @@ import responseMessage from './constants/responseMessage'
 import httpError from './utils/httpError'
 import helmet from 'helmet'
 import cors from 'cors'
+import cookieParser from 'cookie-parser'
 
 const app: Application = express()
 
@@ -20,6 +21,7 @@ app.use(
 )
 app.use(express.json())
 app.use(express.static(join(__dirname, '../', './public')))
+app.use(cookieParser());
 
 // ROUTES
 app.use('/api/v1', router)

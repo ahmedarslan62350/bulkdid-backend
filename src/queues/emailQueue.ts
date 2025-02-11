@@ -18,7 +18,7 @@ export const emailWorker = new Worker(
 
         if (!data) {
             logger.error('EMAIL_WORKER', { message: 'No data provided in email job' })
-            return
+            throw new Error('No email job provided in email job')
         }
 
         const { email, html, subject } = data
