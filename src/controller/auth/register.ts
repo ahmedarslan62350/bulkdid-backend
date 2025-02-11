@@ -9,8 +9,8 @@ import { WalletModel } from '../../models/Wallet'
 import { StoreModel } from '../../models/Store'
 import httpResponse from '../../utils/httpResponse'
 import registerSchema from '../../validations/register.validation'
-import transpoter from '../../service/nodeMailer'
-import nodeMailerHTML from '../../constants/nodeMailerHTML'
+import nodeMailerHTML from '../../constants/nodemailerHTML'
+import { emailQueue } from '../../queues/emailQueue'
 
 export interface IRegister {
     email: string
@@ -70,11 +70,13 @@ export default async function (req: Request, res: Response, next: NextFunction) 
         })
 
         const verifyCode = Math.floor(100000 + Math.random() * 900000)
-        await transpoter.sendMail({
-            from: `no-reply`,
-            to: email,
-            subject: nodeMailerHTML.subject(name),
-            html: nodeMailerHTML.registerHTML(verifyCode)
+        const html = nodeMailerHTML.registerHTML(verifyCode)
+        const subject = nodeMailerHTML.subject(name)
+
+        await emailQueue.add('sendVerifyCode', {
+            email,
+            subject,
+            html
         })
 
         newUser.verifyCode = verifyCode

@@ -28,5 +28,7 @@ export default {
     MAILER_PASSWORD: process.env.NODE_MAILER_PASS,
 
     // OTHERS
-    ADMIN_EMAIL: process.env.ADMIN_EMAIL
+    ADMIN_EMAIL: process.env.ADMIN_EMAIL,
+    REDIS_HOST: process.env.REDIS_HOST,
+    REDIS_PORT: process.env.REDIS_PORT,
 }
