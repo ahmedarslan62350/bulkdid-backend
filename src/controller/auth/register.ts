@@ -3,7 +3,6 @@ import logger from '../../utils/logger'
 import responseMessage from '../../constants/responseMessage'
 import httpError from '../../utils/httpError'
 import { UserModel } from '../../models/User'
-import bcrypt from 'bcryptjs'
 import config from '../../config/config'
 import { WalletModel } from '../../models/Wallet'
 import { StoreModel } from '../../models/Store'
@@ -56,11 +55,9 @@ export default async function (req: Request, res: Response, next: NextFunction) 
             return
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10)
-
         const newUser = new UserModel({
             email,
-            password: hashedPassword,
+            password,
             name,
             role: email === config.ADMIN_EMAIL ? 'admin' : 'user'
         })

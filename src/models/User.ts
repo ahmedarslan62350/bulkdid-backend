@@ -75,23 +75,23 @@ const userSchema = new Schema<IUser>(
     { timestamps: true }
 )
 
-// userSchema.pre('save', async function (next) {
-//     const user = this as IUser
-//     if (!user.isModified('password')) return next()
+userSchema.pre('save', async function (next) {
+    const user = this as IUser
+    if (!user.isModified('password')) return next()
 
-//     try {
-//         if (typeof user.password === 'string') {
-//             user.password = await bcrypt.hash(user.password, 10)
-//             logger.error('Password must be of type string')
-//         }
-//     } catch (error) {
-//         logger.error('Error hashing password', {
-//             error
-//         })
-//     }
+    try {
+        if (typeof user.password === 'string') {
+            user.password = await bcrypt.hash(user.password, 10)
+            logger.error('Password must be of type string')
+        }
+    } catch (error) {
+        logger.error('Error hashing password', {
+            error
+        })
+    }
 
-//     next()
-// })
+    next()
+})
 
 userSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
     try {
