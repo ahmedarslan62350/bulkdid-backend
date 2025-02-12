@@ -40,13 +40,27 @@ export default async function (req: Request, res: Response, next: NextFunction) 
         }
 
         if (user.verifyCodeUsed >= 5) {
+            setTimeout(
+                () => {
+                    void (async () => {
+                        await UserModel.updateOne({ _id: user._id }, { $set: { verifyCodeUsed: 0 } })
+                    })()
+                },
+                1000 * 60 * 10
+            )
             httpResponse(req, res, responseMessage.UNAUTHORIZED.code, 'Verify code limit exceeded')
             return
         }
 
         if (user.verifyCode !== verifyCode) {
             user.verifyCodeUsed = user.verifyCodeUsed + 1
-            httpResponse(req, res, responseMessage.UNAUTHORIZED.code, 'Verify code  does not match')
+            await user.save()
+            httpResponse(req, res, responseMessage.UNAUTHORIZED.code, 'Verify code does not match')
+            return
+        }
+
+        if (user.verifyCodeExpiry && new Date(user.verifyCodeExpiry).getTime() < Date.now()) {
+            httpResponse(req, res, responseMessage.UNAUTHORIZED.code, 'Verify code has expired')
             return
         }
 

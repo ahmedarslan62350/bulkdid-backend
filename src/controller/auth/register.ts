@@ -45,7 +45,7 @@ export default async function (req: Request, res: Response, next: NextFunction) 
         }
 
         if (password !== confirmPassword) {
-            httpResponse(req, res, responseMessage.BAD_REQUEST.code,responseMessage.VALIDATION_ERROR.PASSWORD_MISMATCH)
+            httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.VALIDATION_ERROR.PASSWORD_MISMATCH)
             return
         }
 
@@ -91,7 +91,7 @@ export default async function (req: Request, res: Response, next: NextFunction) 
 
         await Promise.all([newUser.save(), wallet.save(), store.save()])
 
-        const header = jwt.sign({ email }, config.JWT_TOKEN_SECRET as string)
+        const header = jwt.sign({ email }, config.JWT_TOKEN_SECRET as string, { expiresIn: '1h' })
         res.cookie('email', header)
 
         setTimeout(

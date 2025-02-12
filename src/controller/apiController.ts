@@ -5,6 +5,9 @@ import httpError from '../utils/httpError'
 import quicker from '../utils/quicker'
 import register from './auth/register'
 import verify from './auth/verify'
+import resend from './auth/resend'
+import login from './auth/login'
+import logout from './auth/logout'
 
 export default {
     self: (req: Request, res: Response, NextFn: NextFunction) => {
@@ -26,6 +29,9 @@ export default {
             httpError(NextFn, error, req, responseMessage.INTERNAL_SERVER_ERROR.code)
         }
     },
-    register: register,
-    verify: verify
+    register,
+    verify,
+    resend,
+    login,
+    logout
 }

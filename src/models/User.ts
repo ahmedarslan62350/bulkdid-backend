@@ -13,7 +13,7 @@ export interface IUser extends Document {
     walletId: ObjectId
     store: ObjectId
     verifyCode: number | null
-    verifyCodeExpiry: Date | null
+    verifyCodeExpiry: Date | number | null
     verifyCodeUsed: number
     isVerified: boolean
     createdAt?: Date
@@ -50,9 +50,7 @@ const userSchema = new Schema<IUser>(
         refreshToken: {
             type: String
         },
-        sessions: {
-            type: [String]
-        },
+        sessions: [{ type: String }],
         store: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Store',
@@ -67,7 +65,7 @@ const userSchema = new Schema<IUser>(
         },
         verifyCodeExpiry: {
             type: Date,
-            default: Date.now() + 1000 * parseInt(config.JWT_REFRESH_TOKEN_EXPIRATION_TIME as string)
+            default: Date.now() + 120000
         },
         verifyCodeUsed: {
             type: Number,
@@ -77,23 +75,23 @@ const userSchema = new Schema<IUser>(
     { timestamps: true }
 )
 
-userSchema.pre('save', async function (next) {
-    const user = this as IUser
-    if (!user.isModified('password')) return next()
+// userSchema.pre('save', async function (next) {
+//     const user = this as IUser
+//     if (!user.isModified('password')) return next()
 
-    try {
-        if (typeof user.password === 'string') {
-            user.password = await bcrypt.hash(user.password, 10)
-            logger.error('Password must be of type string')
-        }
-    } catch (error) {
-        logger.error('Error hashing password', {
-            error
-        })
-    }
+//     try {
+//         if (typeof user.password === 'string') {
+//             user.password = await bcrypt.hash(user.password, 10)
+//             logger.error('Password must be of type string')
+//         }
+//     } catch (error) {
+//         logger.error('Error hashing password', {
+//             error
+//         })
+//     }
 
-    next()
-})
+//     next()
+// })
 
 userSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
     try {
