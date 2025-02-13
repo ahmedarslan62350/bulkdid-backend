@@ -8,6 +8,8 @@ import { emailQueue } from '../../queues/emailQueue'
 import nodemailerHTML from '../../constants/nodemailerHTML'
 import jwtVerification from '../../utils/jwtVerification'
 import { JwtPayload } from 'jsonwebtoken'
+import { StoreModel } from '../../models/Store'
+import { WalletModel } from '../../models/Wallet'
 
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {
@@ -26,16 +28,20 @@ export default async function (req: Request, res: Response, next: NextFunction) 
         }
 
         const user = await UserModel.findByIdAndDelete(jwtResult._id)
-        if(!user){
+        if (!user) {
             httpResponse(req, res, responseMessage.UNAUTHORIZED.code, responseMessage.UNAUTHORIZED.message)
             return
         }
 
-        await emailQueue.add('sendDeleteAccountNotification', {
-            email: user.email,
-            subject: user.name,
-            html: nodemailerHTML.deleteAccount(user.name)
-        })
+        await Promise.all([
+            emailQueue.add('sendDeleteAccountNotification', {
+                email: user.email,
+                subject: user.name,
+                html: nodemailerHTML.deleteAccount(user.name)
+            }),
+            StoreModel.findOneAndDelete({ ownerId: user._id }),
+            WalletModel.findOneAndDelete({ ownerId: user._id })
+        ])
 
         res.clearCookie('token')
         httpResponse(req, res, responseMessage.SUCCESS.code, responseMessage.SUCCESS.message, {

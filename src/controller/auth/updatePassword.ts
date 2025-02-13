@@ -41,7 +41,7 @@ export default async function (req: Request, res: Response, next: NextFunction) 
         }
 
         const { confirmPassword, currentPassword, newPassword, logoutSessions } = data
-        if (!confirmPassword || !currentPassword || !newPassword) {
+        if (!confirmPassword || !currentPassword || !newPassword || !logoutSessions) {
             httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.VALIDATION_ERROR.LESS_DATA)
             return
         }

@@ -8,6 +8,8 @@ import verify from './auth/verify'
 import resend from './auth/resend'
 import login from './auth/login'
 import logout from './auth/logout'
+import _delete from './auth/delete'
+import updatePassword from './auth/updatePassword'
 
 export default {
     self: (req: Request, res: Response, NextFn: NextFunction) => {
@@ -33,5 +35,7 @@ export default {
     verify,
     resend,
     login,
-    logout
+    logout,
+    _delete,
+    updatePassword
 }
