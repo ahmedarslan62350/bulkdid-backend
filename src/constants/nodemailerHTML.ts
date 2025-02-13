@@ -11,5 +11,13 @@ export default {
     verification: (name: string) => `
                     <h1>Hey ${name}!</h1>
                     <p>Your account successfully verified and created.</p>
-                `
+                `,
+    passwordChanged: (name: string) => `
+                    <h1>Hey ${name}!</h1>
+                    <p>You have changed your password successfully</p>
+                `,
+    deleteAccount: (name: string) => `
+                <h1>Hey ${name}!</h1>
+                <p>You have deleted your account</p>
+            `            
 }

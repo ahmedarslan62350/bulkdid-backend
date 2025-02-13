@@ -2,26 +2,30 @@ import { NextFunction, Request, Response } from 'express'
 import logger from '../../utils/logger'
 import responseMessage from '../../constants/responseMessage'
 import httpError from '../../utils/httpError'
-import jwt, { JwtPayload } from 'jsonwebtoken'
-import config from '../../config/config'
+import { JwtPayload } from 'jsonwebtoken'
 import { UserModel } from '../../models/User'
 import httpResponse from '../../utils/httpResponse'
 import { emailQueue } from '../../queues/emailQueue'
 import nodemailerHTML from '../../constants/nodemailerHTML'
+import jwtVerification from '../../utils/jwtVerification'
 
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {
         const cookies = req.cookies
-        const { email: jwtEmail } = cookies
+        const { email: token } = cookies
 
-        if (!jwtEmail) {
+        if (!token) {
             httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.UNAUTHORIZED.message)
             return
         }
 
-        const data = jwt.verify(jwtEmail as string, config.JWT_TOKEN_SECRET as string) as JwtPayload
-        const user = await UserModel.findOne({ email: data.email })
+        const data = jwtVerification.verifyJWT(token as string) as JwtPayload
+        if (!data) {
+            httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.UNAUTHORIZED.message)
+            return
+        }
 
+        const user = await UserModel.findOne({ email: data.email })
         if (!user) {
             httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.UNAUTHORIZED.message)
             return

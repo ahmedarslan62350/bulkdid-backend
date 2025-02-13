@@ -2,12 +2,12 @@ import { NextFunction, Request, Response } from 'express'
 import logger from '../../utils/logger'
 import responseMessage from '../../constants/responseMessage'
 import httpError from '../../utils/httpError'
-import jwt, { JwtPayload } from 'jsonwebtoken'
-import config from '../../config/config'
+import { JwtPayload } from 'jsonwebtoken'
 import { UserModel } from '../../models/User'
 import httpResponse from '../../utils/httpResponse'
 import { emailQueue } from '../../queues/emailQueue'
 import nodemailerHTML from '../../constants/nodemailerHTML'
+import jwtVerification from '../../utils/jwtVerification'
 
 export interface IVerify {
     verifyCode: string
@@ -17,15 +17,15 @@ export interface IVerify {
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {
         const cookies = req.cookies
-        const { email: jwtEmail } = cookies
+        const { email: token } = cookies
         const verifyCode = parseInt(req.query.verifyCode as string)
 
-        if (!jwtEmail || !verifyCode) {
+        if (!token || !verifyCode) {
             httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.VALIDATION_ERROR.LESS_DATA)
             return
         }
 
-        const data = jwt.verify(jwtEmail as string, config.JWT_TOKEN_SECRET as string) as JwtPayload
+        const data = jwtVerification.verifyJWT(token as string) as JwtPayload
 
         if (!data || !data.email) {
             httpResponse(req, res, responseMessage.UNAUTHORIZED.code, responseMessage.UNAUTHORIZED.message)

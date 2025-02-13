@@ -4,38 +4,40 @@ import responseMessage from '../../constants/responseMessage'
 import httpError from '../../utils/httpError'
 import { UserModel } from '../../models/User'
 import httpResponse from '../../utils/httpResponse'
-import { JwtPayload } from 'jsonwebtoken'
+import { emailQueue } from '../../queues/emailQueue'
+import nodemailerHTML from '../../constants/nodemailerHTML'
 import jwtVerification from '../../utils/jwtVerification'
+import { JwtPayload } from 'jsonwebtoken'
 
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {
         const cookies = req.cookies
-        if (!cookies) {
-            httpResponse(req, res, responseMessage.UNAUTHORIZED.code, responseMessage.UNAUTHORIZED.message)
-            return
-        }
-
         const { token } = cookies
-        
-        const decodedData = jwtVerification.verifyJWT(token as string) as JwtPayload
-        if (!decodedData) {
+
+        if (!token) {
             httpResponse(req, res, responseMessage.UNAUTHORIZED.code, responseMessage.UNAUTHORIZED.message)
             return
         }
 
-        const user = await UserModel.findById(decodedData._id)
-        if (!user) {
-            httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.UNAUTHORIZED.message)
+        const jwtResult = jwtVerification.verifyJWT(token as string) as JwtPayload
+        if (!jwtResult) {
+            httpResponse(req, res, responseMessage.UNAUTHORIZED.code, responseMessage.UNAUTHORIZED.message)
             return
         }
 
-        const ip = req?.ip ? req.ip : '127.0.0.1'
-        user.sessions.splice(user.sessions.indexOf(ip) - 1, user.sessions.indexOf(ip))
-        user.refreshToken = ''
+        const user = await UserModel.findByIdAndDelete(jwtResult._id)
+        if(!user){
+            httpResponse(req, res, responseMessage.UNAUTHORIZED.code, responseMessage.UNAUTHORIZED.message)
+            return
+        }
+
+        await emailQueue.add('sendDeleteAccountNotification', {
+            email: user.email,
+            subject: user.name,
+            html: nodemailerHTML.deleteAccount(user.name)
+        })
 
         res.clearCookie('token')
-        await user.save()
-
         httpResponse(req, res, responseMessage.SUCCESS.code, responseMessage.SUCCESS.message, {
             success: true,
             message: 'User logined successfully'

@@ -10,7 +10,7 @@ import httpResponse from '../../utils/httpResponse'
 import registerSchema from '../../validations/register.validation'
 import nodeMailerHTML from '../../constants/nodemailerHTML'
 import { emailQueue } from '../../queues/emailQueue'
-import jwt from 'jsonwebtoken'
+import jwtVerification from '../../utils/jwtVerification'
 
 export interface IRegister {
     email: string
@@ -88,7 +88,12 @@ export default async function (req: Request, res: Response, next: NextFunction) 
 
         await Promise.all([newUser.save(), wallet.save(), store.save()])
 
-        const header = jwt.sign({ email }, config.JWT_TOKEN_SECRET as string, { expiresIn: '1h' })
+        const header = jwtVerification.signJWT({ email }, { expiresIn: '1h' })
+        if (!header) {
+            httpResponse(req, res, responseMessage.BAD_REQUEST.code, 'Error signing jwt token')
+            return
+        }
+        
         res.cookie('email', header)
 
         setTimeout(
