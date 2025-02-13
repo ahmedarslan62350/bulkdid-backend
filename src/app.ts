@@ -1,4 +1,4 @@
-import express, { Application, NextFunction, Request, Response } from 'express'
+import express, { Application, NextFunction, Request, Response, urlencoded } from 'express'
 import { join } from 'path'
 import router from './router/apiRouter'
 import globalErrorHandler from './middleware/globalErrorHandler'
@@ -7,6 +7,8 @@ import httpError from './utils/httpError'
 import helmet from 'helmet'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
+import authRouter from './router/authRouter'
+import rateLimit from './middleware/rateLimit'
 
 const app: Application = express()
 
@@ -21,10 +23,12 @@ app.use(
 )
 app.use(express.json())
 app.use(express.static(join(__dirname, '../', './public')))
-app.use(cookieParser());
+app.use(cookieParser())
+app.use(urlencoded({ extended: true }))
 
 // ROUTES
-app.use('/api/v1', router)
+app.use('/api/v1', rateLimit, router)
+app.use('/api/v1/auth', rateLimit, authRouter)
 
 // GLOBAL ERROR HANDLER
 app.use((req: Request, _: Response, NextFn: NextFunction) => {
