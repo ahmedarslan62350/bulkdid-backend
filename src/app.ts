@@ -9,6 +9,8 @@ import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import authRouter from './router/authRouter'
 import rateLimit from './middleware/rateLimit'
+import isAuthenticated from './middleware/isAuthenticated'
+import fileRouter from './router/fileRouter'
 
 const app: Application = express()
 
@@ -29,6 +31,7 @@ app.use(urlencoded({ extended: true }))
 // ROUTES
 app.use('/api/v1', rateLimit, router)
 app.use('/api/v1/auth', rateLimit, authRouter)
+app.use('/api/v1/file', rateLimit, isAuthenticated, fileRouter)
 
 // GLOBAL ERROR HANDLER
 app.use((req: Request, _: Response, NextFn: NextFunction) => {

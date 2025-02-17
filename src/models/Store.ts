@@ -7,7 +7,7 @@ export interface IStore extends Document {
     files: [ObjectId]
     fetchRequests: number
     callerIdStore: ObjectId
-    callerIds: [number]
+    callerIds: number
     createdAt?: Date
     updatedAt?: Date
 }
@@ -37,11 +37,10 @@ const storeSchema = new Schema<IStore>(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'CallerIdStore'
         },
-        callerIds: [
-            {
-                type: Number
-            }
-        ]
+        callerIds: {
+            type: Number,
+            default: 0
+        }
     },
     { timestamps: true }
 )

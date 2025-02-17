@@ -46,7 +46,7 @@ export default async function (req: Request, res: Response, next: NextFunction) 
         res.clearCookie('token')
         httpResponse(req, res, responseMessage.SUCCESS.code, responseMessage.SUCCESS.message, {
             success: true,
-            message: 'User logined successfully'
+            message: 'User deleted successfully'
         })
     } catch (error) {
         logger.error(responseMessage.UNPROCESSABLE_ENTITY.message, { error })

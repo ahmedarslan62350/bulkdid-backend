@@ -5,7 +5,6 @@ import databaseService from './service/databaseService'
 import logger from './utils/logger'
 
 const server = app.listen(config.PORT)
-
 void (async () => {
     try {
         // DATABASE_CONNECTION

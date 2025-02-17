@@ -1,21 +1,22 @@
 {
-  "compilerOptions": {
-    "target": "ESNext", 
-    "module": "CommonJS",
-    "lib": ["ESNext", "DOM"],
-    "strict": true,
-    "allowJs": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true,
-    "moduleResolution": "Node",
-    "outDir": "./dist",
-    "rootDir": ".",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noImplicitAny": true,
-    "sourceMap": true
-  },
-  "include": ["src" , "test"],
-  "exclude": ["node_modules", "dist"]
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "CommonJS",
+        "lib": ["ESNext", "DOM"],
+        "strict": true,
+        "allowJs": true,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "skipLibCheck": true,
+        "moduleResolution": "Node",
+        "outDir": "./dist",
+        "rootDir": ".",
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "noImplicitAny": true,
+        "sourceMap": true,
+        "typeRoots": ["./node_modules/@types", "./src/types"]  // Add this line
+    },
+    "include": ["src", "test", "script"],
+    "exclude": ["node_modules", "dist"]
 }

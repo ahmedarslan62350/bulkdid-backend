@@ -38,7 +38,7 @@ export default async function (req: Request, res: Response, next: NextFunction) 
 
         httpResponse(req, res, responseMessage.SUCCESS.code, responseMessage.SUCCESS.message, {
             success: true,
-            message: 'User logined successfully'
+            message: 'User logout successfully'
         })
     } catch (error) {
         logger.error(responseMessage.UNPROCESSABLE_ENTITY.message, { error })
