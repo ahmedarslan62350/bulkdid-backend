@@ -10,6 +10,7 @@ import login from './auth/login'
 import logout from './auth/logout'
 import _delete from './auth/delete'
 import updatePassword from './auth/updatePassword'
+import upload from './file/upload'
 
 export default {
     self: (req: Request, res: Response, NextFn: NextFunction) => {
@@ -37,5 +38,6 @@ export default {
     login,
     logout,
     _delete,
-    updatePassword
+    updatePassword,
+    uploadFile:upload
 }

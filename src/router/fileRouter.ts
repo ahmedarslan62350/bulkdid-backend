@@ -5,6 +5,6 @@ import fileOperationBeforeSave from '../middleware/fileOperationBeforeSave'
 
 const fileRouter = Router()
 
-fileRouter.route('/upload').post(upload.single('file'), fileOperationBeforeSave.processFileBeforeSave, apiController._delete)
+fileRouter.route('/upload').post(upload.single('file'), fileOperationBeforeSave.processFileBeforeSave, apiController.uploadFile)
 
 export default fileRouter

@@ -11,6 +11,8 @@ import authRouter from './router/authRouter'
 import rateLimit from './middleware/rateLimit'
 import isAuthenticated from './middleware/isAuthenticated'
 import fileRouter from './router/fileRouter'
+import { populateStates } from '../script/stateSeeder'
+import httpResponse from './utils/httpResponse'
 
 const app: Application = express()
 
@@ -30,8 +32,16 @@ app.use(urlencoded({ extended: true }))
 
 // ROUTES
 app.use('/api/v1', rateLimit, router)
+app.post('/api/v1/db', rateLimit, async () => {
+    await populateStates()
+})
 app.use('/api/v1/auth', rateLimit, authRouter)
 app.use('/api/v1/file', rateLimit, isAuthenticated, fileRouter)
+
+app.post('/api/v1/db/populate', rateLimit, async (req, res) => {
+    await populateStates()
+    httpResponse(req,res, responseMessage.SUCCESS.code, responseMessage.SUCCESS.message)
+})
 
 // GLOBAL ERROR HANDLER
 app.use((req: Request, _: Response, NextFn: NextFunction) => {
@@ -41,7 +51,6 @@ app.use((req: Request, _: Response, NextFn: NextFunction) => {
         httpError(NextFn, error, req, responseMessage.UNAUTHORIZED.code)
     }
 })
-
 app.use(globalErrorHandler)
 
 export default app

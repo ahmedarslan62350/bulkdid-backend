@@ -1,9 +1,9 @@
-import { NextFunction, Request, Response } from 'express'
+import { NextFunction, Response, Request } from 'express'
 import logger from '../../utils/logger'
 import responseMessage from '../../constants/responseMessage'
 import httpError from '../../utils/httpError'
 import httpResponse from '../../utils/httpResponse'
-import { join } from 'path'
+import path, { join } from 'path'
 import { UserModel } from '../../models/User'
 import fs from 'fs'
 import { FileModel } from '../../models/File'
@@ -39,13 +39,13 @@ export default async function (req: Request, res: Response, next: NextFunction) 
             callerIds: callerIds.length,
             size: file.size,
             state: 'pending',
-            type: file.mimetype.split('/')[1],
+            type: path.extname(file.originalname),
             role
         })
 
         if (role === 'checking-status' || role === 'both') {
             // CHECKING HANDLER e.g: handler(callerIDs).then(function){ ALL_THAT_BELOW }
-            const pathToFileStore = join(__dirname, '../uploads', JSON.stringify(user._id))
+            const pathToFileStore = join(__dirname, '../../../uploads')
             const SFilePath = join(pathToFileStore, `${Date.now()}-${file.originalname}`)
 
             if (!fs.existsSync(pathToFileStore)) {
@@ -54,6 +54,7 @@ export default async function (req: Request, res: Response, next: NextFunction) 
             // NOT_THIS_FILE_BUT_CHECKED_CALLERIDS
             fs.writeFileSync(SFilePath, file.buffer)
             SFile.path = SFilePath
+            await SFile.save()
         }
 
         if (role === 'fetching' || role === 'both') {
@@ -66,7 +67,8 @@ export default async function (req: Request, res: Response, next: NextFunction) 
             // Creating and managing callerIdStores for specfic state
             await callerIdQueue.add('process-caller-ids', { callerIds, userId: user._id })
             store.files.push(SFile._id)
-            store.callerIds += callerIds.length
+            store.callerIds = store.callerIds + callerIds.length
+            await store.save()
         }
 
         httpResponse(req, res, responseMessage.SUCCESS.code, responseMessage.SUCCESS.message, {

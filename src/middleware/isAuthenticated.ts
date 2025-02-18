@@ -1,9 +1,10 @@
-import { NextFunction, Request, Response } from 'express'
+import { NextFunction, Response } from 'express'
 import logger from '../utils/logger'
 import httpResponse from '../utils/httpResponse'
 import responseMessage from '../constants/responseMessage'
 import jwtVerification from '../utils/jwtVerification'
 import { IAccessTokenData } from '../controller/auth/login'
+import { Request } from 'express'
 
 export default function (req: Request, res: Response, next: NextFunction) {
     try {
@@ -24,7 +25,7 @@ export default function (req: Request, res: Response, next: NextFunction) {
             httpResponse(req, res, responseMessage.UNAUTHORIZED.code, responseMessage.UNAUTHORIZED.message)
             return
         }
-        
+
         req.user = data as IAccessTokenData
         next()
     } catch (error) {
