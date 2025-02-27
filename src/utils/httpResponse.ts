@@ -2,9 +2,16 @@ import { Request, Response } from 'express'
 import { THttpResponse } from '../types/types'
 import config from '../config/config'
 import { EApplicationEnvironment } from '../constants/application'
-import logger from './logger'
+// import logger from './logger'
 
-export default (req: Request, res: Response, responseStatusCode: number, responseMessage: string, data: unknown = null): void => {
+export default (
+    req: Request,
+    res: Response,
+    responseStatusCode: number,
+    responseMessage: string | number,
+    data: unknown = null,
+    type: 'default' | 'custom' = 'default'
+): void => {
     const response: THttpResponse = {
         success: true,
         status: responseStatusCode,
@@ -13,18 +20,22 @@ export default (req: Request, res: Response, responseStatusCode: number, respons
             method: req.method,
             url: req.originalUrl
         },
-        message: responseMessage,
+        message: typeof responseMessage === 'string' ? responseMessage : '',
         data
     }
 
     // LOG
 
-    logger.info('CONTROLLER_RESPONCE', { meta: response })
+    // logger.info('CONTROLLER_RESPONCE', { meta: response })
 
     // Production ENV check
     if (config.ENV === EApplicationEnvironment.PRODUCTION) {
         delete response.request.ip
     }
 
-    res.status(responseStatusCode).json(response)
+    if (type === 'default') {
+        res.status(responseStatusCode).json(response)
+    } else if (type === 'custom') {
+        res.status(responseStatusCode).json(responseMessage)
+    }
 }

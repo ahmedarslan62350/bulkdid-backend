@@ -20,5 +20,9 @@ export default {
                 external: `${(process.memoryUsage().external / 1024 / 1024).toFixed(2)} MB`
             }
         }
-    }
+    },
+    extractStatusCode(callerId: string): number {
+        const ans = callerId.length === 11 ? parseInt(callerId.slice(1, 4)) : parseInt(callerId.slice(0, 3))
+        return Number(ans)
+    },
 }

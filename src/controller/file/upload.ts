@@ -1,14 +1,16 @@
 import { NextFunction, Response, Request } from 'express'
+import { UserModel } from '../../models/User'
+import { FileModel } from '../../models/File'
+import { callerIdQueue } from '../../queues/storeCallerIdsToDBQueue'
+import { StoreModel } from '../../models/Store'
+import { WalletModel } from '../../models/Wallet'
+import path, { join } from 'path'
 import logger from '../../utils/logger'
 import responseMessage from '../../constants/responseMessage'
 import httpError from '../../utils/httpError'
 import httpResponse from '../../utils/httpResponse'
-import path, { join } from 'path'
-import { UserModel } from '../../models/User'
+import config from '../../config/config'
 import fs from 'fs'
-import { FileModel } from '../../models/File'
-import { StoreModel } from '../../models/Store'
-import { callerIdQueue } from '../../queues/storeCallerIdsToDBQueue'
 
 export interface IFile {
     role: string
@@ -31,21 +33,38 @@ export default async function (req: Request, res: Response, next: NextFunction) 
             return
         }
 
+        const wallet = await WalletModel.findById(user.walletId)
+        if (!wallet) {
+            httpResponse(req, res, responseMessage.NOT_FOUND.code, responseMessage.NOT_FOUND.message('user wallet'))
+            return
+        }
+
         const SFile = new FileModel({
             // SFILE : SFile stands for StoreFile that stored to database
             ownerId: user._id,
             name: file.originalname,
-            path: null,
+            path: '',
             callerIds: callerIds.length,
             size: file.size,
             state: 'pending',
             type: path.extname(file.originalname),
-            role
+            role,
         })
 
         if (role === 'checking-status' || role === 'both') {
+            const totalCost = callerIds.length * Number(config.COST_PER_CALLERID_CHECK)
+            if (wallet.balance < totalCost) {
+                httpResponse(req, res, responseMessage.SERVICE_UNAVAILABLE.code, 'You have no balance available for this operation')
+                return
+            }
+
+            const store = await StoreModel.findById(user.store)
+            if (!store) {
+                httpResponse(req, res, responseMessage.NOT_FOUND.code, responseMessage.SERVICE_UNAVAILABLE.message)
+                return
+            }
             // CHECKING HANDLER e.g: handler(callerIDs).then(function){ ALL_THAT_BELOW }
-            const pathToFileStore = join(__dirname, '../../../uploads')
+            const pathToFileStore = join(__dirname, '../../../../uploads')
             const SFilePath = join(pathToFileStore, `${Date.now()}-${file.originalname}`)
 
             if (!fs.existsSync(pathToFileStore)) {
@@ -54,7 +73,9 @@ export default async function (req: Request, res: Response, next: NextFunction) 
             // NOT_THIS_FILE_BUT_CHECKED_CALLERIDS
             fs.writeFileSync(SFilePath, file.buffer)
             SFile.path = SFilePath
-            await SFile.save()
+            store.files.push(SFile._id)
+            store.callerIds = store.callerIds + callerIds.length
+            await Promise.all([store.save(), SFile.save()])
         }
 
         if (role === 'fetching' || role === 'both') {
@@ -65,10 +86,10 @@ export default async function (req: Request, res: Response, next: NextFunction) 
                 return
             }
             // Creating and managing callerIdStores for specfic state
-            await callerIdQueue.add('process-caller-ids', { callerIds, userId: user._id })
+            // handeling double updating mongodb schemas in file-type both 
             store.files.push(SFile._id)
             store.callerIds = store.callerIds + callerIds.length
-            await store.save()
+            await Promise.all([store.save(), SFile.save(), callerIdQueue.add('process-caller-ids', { callerIds, userId: user._id , user})])
         }
 
         httpResponse(req, res, responseMessage.SUCCESS.code, responseMessage.SUCCESS.message, {

@@ -6,7 +6,7 @@ export interface IStore extends Document {
     ownerId: ObjectId
     files: [ObjectId]
     fetchRequests: number
-    callerIdStore: ObjectId
+    callerIdStores: [ObjectId]
     callerIds: number
     createdAt?: Date
     updatedAt?: Date
@@ -33,10 +33,12 @@ const storeSchema = new Schema<IStore>(
             type: Number,
             default: 0
         },
-        callerIdStore: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'CallerIdStore'
-        },
+        callerIdStores: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'CallerIdStore'
+            }
+        ],
         callerIds: {
             type: Number,
             default: 0

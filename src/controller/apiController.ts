@@ -11,6 +11,7 @@ import logout from './auth/logout'
 import _delete from './auth/delete'
 import updatePassword from './auth/updatePassword'
 import upload from './file/upload'
+import fetchCalllerId from './callerId/fetch'
 
 export default {
     self: (req: Request, res: Response, NextFn: NextFunction) => {
@@ -39,5 +40,6 @@ export default {
     logout,
     _delete,
     updatePassword,
-    uploadFile:upload
+    uploadFile:upload,
+    fetchCalllerId,
 }

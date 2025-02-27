@@ -6,7 +6,7 @@ export interface IFile extends Document {
     name: string
     size: number
     state: 'pending' | 'processing' | 'completed' | 'failed'
-    path: string
+    path: string | null
     callerIds: number
     type: 'xlsx' | 'csv' | '.csv' | '.xlsx'
     role: 'checking-status' | 'fetching' | 'both'
@@ -38,7 +38,6 @@ const fileSchema = new Schema<IFile>(
         },
         path: {
             type: String,
-            required: true
         },
         callerIds: {
             type: Number,

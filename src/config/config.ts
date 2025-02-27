@@ -31,4 +31,6 @@ export default {
     ADMIN_EMAIL: process.env.ADMIN_EMAIL,
     REDIS_HOST: process.env.REDIS_HOST,
     REDIS_PORT: process.env.REDIS_PORT,
+    COST_PER_CALLERID_CHECK: process.env.COST_PER_CALLERID_CHECK,
+    COST_PER_CALLERID_FETCH: process.env.COST_PER_CALLERID_FETCH
 }

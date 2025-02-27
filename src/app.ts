@@ -13,6 +13,7 @@ import isAuthenticated from './middleware/isAuthenticated'
 import fileRouter from './router/fileRouter'
 import { populateStates } from '../script/stateSeeder'
 import httpResponse from './utils/httpResponse'
+import callerIdRouter from './router/callerIdRouter'
 
 const app: Application = express()
 
@@ -37,10 +38,11 @@ app.post('/api/v1/db', rateLimit, async () => {
 })
 app.use('/api/v1/auth', rateLimit, authRouter)
 app.use('/api/v1/file', rateLimit, isAuthenticated, fileRouter)
+app.use('/api/v1/callerId', rateLimit, isAuthenticated, callerIdRouter)
 
 app.post('/api/v1/db/populate', rateLimit, async (req, res) => {
     await populateStates()
-    httpResponse(req,res, responseMessage.SUCCESS.code, responseMessage.SUCCESS.message)
+    httpResponse(req, res, responseMessage.SUCCESS.code, responseMessage.SUCCESS.message)
 })
 
 // GLOBAL ERROR HANDLER

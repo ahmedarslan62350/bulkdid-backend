@@ -4,7 +4,7 @@ export interface IState extends Document {
     _id: ObjectId
     name: string
     statusCodes: [number]
-    callerIds: [string]
+    callerIds: [number]
     createdAt?: Date
     updatedAt?: Date
 }
@@ -19,7 +19,7 @@ const stateSchema = new Schema<IState>(
             type: [Number]
         },
         callerIds: {
-            type: [String]
+            type: [Number]
         }
     },
     { timestamps: true }
