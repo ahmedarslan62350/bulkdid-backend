@@ -1,6 +1,6 @@
 import { NextFunction, Response, Request } from 'express'
 import { UserModel } from '../../models/User'
-import { FileModel } from '../../models/File'
+import { FileModel, IFile as IFileModel } from '../../models/File'
 import { callerIdQueue } from '../../queues/storeCallerIdsToDBQueue'
 import { StoreModel } from '../../models/Store'
 import { WalletModel } from '../../models/Wallet'
@@ -39,16 +39,17 @@ export default async function (req: Request, res: Response, next: NextFunction) 
             return
         }
 
-        const SFile = new FileModel({
+        const SFile: IFileModel = new FileModel({
             // SFILE : SFile stands for StoreFile that stored to database
             ownerId: user._id,
             name: file.originalname,
             path: '',
-            callerIds: callerIds.length,
+            totalCallerIds: callerIds.length,
             size: file.size,
             state: 'pending',
             type: path.extname(file.originalname),
             role,
+            callerIds: [...callerIds]
         })
 
         if (role === 'checking-status' || role === 'both') {
@@ -57,7 +58,7 @@ export default async function (req: Request, res: Response, next: NextFunction) 
                 httpResponse(req, res, responseMessage.SERVICE_UNAVAILABLE.code, 'You have no balance available for this operation')
                 return
             }
-
+            wallet.balance -= totalCost
             const store = await StoreModel.findById(user.store)
             if (!store) {
                 httpResponse(req, res, responseMessage.NOT_FOUND.code, responseMessage.SERVICE_UNAVAILABLE.message)
@@ -75,7 +76,7 @@ export default async function (req: Request, res: Response, next: NextFunction) 
             SFile.path = SFilePath
             store.files.push(SFile._id)
             store.callerIds = store.callerIds + callerIds.length
-            await Promise.all([store.save(), SFile.save()])
+            await Promise.all([store.save(), SFile.save(), wallet.save()])
         }
 
         if (role === 'fetching' || role === 'both') {
@@ -86,10 +87,10 @@ export default async function (req: Request, res: Response, next: NextFunction) 
                 return
             }
             // Creating and managing callerIdStores for specfic state
-            // handeling double updating mongodb schemas in file-type both 
+            // handeling double updating mongodb schemas in file-type both
             store.files.push(SFile._id)
             store.callerIds = store.callerIds + callerIds.length
-            await Promise.all([store.save(), SFile.save(), callerIdQueue.add('process-caller-ids', { callerIds, userId: user._id , user})])
+            await Promise.all([store.save(), SFile.save(), callerIdQueue.add('process-caller-ids', { callerIds, userId: user._id, user })])
         }
 
         httpResponse(req, res, responseMessage.SUCCESS.code, responseMessage.SUCCESS.message, {

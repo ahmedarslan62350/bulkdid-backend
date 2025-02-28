@@ -24,6 +24,9 @@ export default {
         PASSWORD_MISMATCH: `Passwords do not match`,
         EMAIL_ALREADY_EXISTS:`Email address already exists`,
         INVALID_ENTITY:`Invalid entity provided`,
+        FIELD_REQUIRED: (field: string) => `The field '${field}' is required`,
+        FIELD_PATTERN_MISMATCH: (field: string) => `The field '${field}' does not match the required pattern`,
+        FIELD_RANGE_VIOLATION: (field: string, min: number, max: number) => `The field '${field}' must be between ${min} and ${max}`,
         FIELD_TOO_LONG: (field: string, limit: number) => `The field '${field}' exceeds the maximum allowed length of ${limit} characters`,
         FIELD_TOO_SHORT: (field: string, limit: number) => `The field '${field}' must be at least ${limit} characters long`
     }

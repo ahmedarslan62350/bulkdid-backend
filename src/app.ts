@@ -14,6 +14,9 @@ import fileRouter from './router/fileRouter'
 import { populateStates } from '../script/stateSeeder'
 import httpResponse from './utils/httpResponse'
 import callerIdRouter from './router/callerIdRouter'
+import { syncRedisToMongo } from './service/redisInstance'
+import logger from './utils/logger'
+import config from './config/config'
 
 const app: Application = express()
 
@@ -56,3 +59,12 @@ app.use((req: Request, _: Response, NextFn: NextFunction) => {
 app.use(globalErrorHandler)
 
 export default app
+
+setInterval(
+    () => {
+        syncRedisToMongo()
+            .then(() => logger.info('syncRedisToMongo solved'))
+            .catch(() => logger.error('Something went wrong in syncRedisToMongo'))
+    },
+    1000 * 60 * Number(config.TIME_TO_UPDATE_DB_BY_REDIS)
+)

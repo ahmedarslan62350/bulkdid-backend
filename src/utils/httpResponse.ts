@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 import { THttpResponse } from '../types/types'
 import config from '../config/config'
 import { EApplicationEnvironment } from '../constants/application'
-// import logger from './logger'
+import logger from './logger'
 
 export default (
     req: Request,
@@ -26,7 +26,7 @@ export default (
 
     // LOG
 
-    // logger.info('CONTROLLER_RESPONCE', { meta: response })
+    logger.info('CONTROLLER_RESPONCE', { meta: response })
 
     // Production ENV check
     if (config.ENV === EApplicationEnvironment.PRODUCTION) {

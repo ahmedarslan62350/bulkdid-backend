@@ -12,6 +12,8 @@ import _delete from './auth/delete'
 import updatePassword from './auth/updatePassword'
 import upload from './file/upload'
 import fetchCalllerId from './callerId/fetch'
+import { getAllCallerIds, getCallerIdsByStateName } from './callerId/getCallerIds'
+import downloadFile from './file/download'
 
 export default {
     self: (req: Request, res: Response, NextFn: NextFunction) => {
@@ -42,4 +44,7 @@ export default {
     updatePassword,
     uploadFile:upload,
     fetchCalllerId,
+    getAllCallerIds,
+    getCallerIdsByStateName,
+    downloadFile,
 }

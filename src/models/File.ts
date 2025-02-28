@@ -7,7 +7,8 @@ export interface IFile extends Document {
     size: number
     state: 'pending' | 'processing' | 'completed' | 'failed'
     path: string | null
-    callerIds: number
+    totalCallerIds: number
+    callerIds: [number]
     type: 'xlsx' | 'csv' | '.csv' | '.xlsx'
     role: 'checking-status' | 'fetching' | 'both'
     downloads: number
@@ -37,16 +38,21 @@ const fileSchema = new Schema<IFile>(
             default: 'pending'
         },
         path: {
-            type: String,
+            type: String
         },
-        callerIds: {
+        callerIds: [
+            {
+                type: Number
+            }
+        ],
+        totalCallerIds: {
             type: Number,
             required: true,
             default: 0
         },
         type: {
             type: String,
-            enum: ['xlsx', 'csv' , '.csv' , '.xlsx'],
+            enum: ['xlsx', 'csv', '.csv', '.xlsx'],
             required: true
         },
         role: {

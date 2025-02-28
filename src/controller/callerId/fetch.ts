@@ -7,6 +7,8 @@ import httpResponse from '../../utils/httpResponse'
 import quicker from '../../utils/quicker'
 import { CallerIdStoreModel, ICallerIdStore } from '../../models/CallerIdStore'
 import { redis } from '../../service/redisInstance'
+import { Iwallet, WalletModel } from '../../models/Wallet'
+import config from '../../config/config'
 
 export default async function fetchCalllerId(req: Request, res: Response, next: NextFunction) {
     try {
@@ -18,10 +20,21 @@ export default async function fetchCalllerId(req: Request, res: Response, next: 
 
         const user = req.user!
         const stateCode = quicker.extractStatusCode(id)
-        const redisKey = `users:${user.email}`
+        const redisKey = `users:callerIds:${user.email}`
+        const redisUserWallet = `users:wallet:${user.email}`
         const redisCallerIdStores = await redis.lrange(redisKey, 0, -1)
 
         if (!redisCallerIdStores.length) {
+            const wallet = await WalletModel.findById(user.walletId)
+            if (!wallet) {
+                httpResponse(req, res, responseMessage.NOT_FOUND.code, responseMessage.NOT_FOUND.message('user wallet'))
+                return
+            }
+            if (wallet.balance < Number(config.COST_PER_CALLERID_FETCH)) {
+                httpResponse(req, res, responseMessage.SERVICE_UNAVAILABLE.code, 'No much sufficient balance available')
+                return
+            }
+            wallet.balance -= Number(config.COST_PER_CALLERID_FETCH)
             const callerIdStores = await CallerIdStoreModel.find({ ownerId: user._id })
             if (!callerIdStores.length) {
                 httpResponse(req, res, responseMessage.NOT_FOUND.code, responseMessage.NOT_FOUND.message('callerId store'))
@@ -30,7 +43,7 @@ export default async function fetchCalllerId(req: Request, res: Response, next: 
             const strCallerIdStores = callerIdStores.map((e) => JSON.stringify(e))
             const callerIdStore = callerIdStores.find((e) => e.statusCodes.includes(stateCode))!
 
-            await redis.rpush(redisKey, ...strCallerIdStores)
+            await Promise.all([redis.rpush(redisKey, ...strCallerIdStores), redis.set(redisUserWallet, JSON.stringify(wallet))])
 
             let callerIdToSend
             if (callerIdStore.index <= callerIdStore.callerIds.length - 1) {
@@ -42,7 +55,7 @@ export default async function fetchCalllerId(req: Request, res: Response, next: 
             }
 
             callerIdStore.fetchRequests++
-            await callerIdStore.save()
+            await Promise.all([callerIdStore.save(), wallet.save()])
 
             httpResponse(req, res, responseMessage.SUCCESS.code, callerIdToSend, null, 'custom')
             return
@@ -63,10 +76,33 @@ export default async function fetchCalllerId(req: Request, res: Response, next: 
 
         callerIdStore.fetchRequests++
 
+        const strWallet = await redis.get(redisUserWallet)
+        let wallet: Iwallet
+
+        if (!strWallet) {
+            const walletFromDB = await WalletModel.findById(user.walletId)
+            if (!walletFromDB) {
+                httpResponse(req, res, responseMessage.NOT_FOUND.code, responseMessage.NOT_FOUND.message('user wallet'))
+                return
+            }
+            wallet = walletFromDB
+
+            await Promise.all([redis.set(redisUserWallet, JSON.stringify(walletFromDB))])
+        }
+
+        wallet = JSON.parse(strWallet!) as Iwallet
+
+        if (wallet.balance < Number(config.COST_PER_CALLERID_FETCH)) {
+            httpResponse(req, res, responseMessage.NOT_FOUND.code, responseMessage.NOT_FOUND.message('balance in wallet'))
+            return
+        }
+
+        wallet.balance -= Number(config.COST_PER_CALLERID_FETCH)
+
         if (index !== -1) {
-            await redis.lset(redisKey, index, JSON.stringify(callerIdStore))
+            await Promise.all([redis.lset(redisKey, index, JSON.stringify(callerIdStore)), redis.set(redisUserWallet, JSON.stringify(wallet))])
         } else {
-            await redis.rpush(redisKey, JSON.stringify(callerIdStore)) // If not found, add it
+            await Promise.all([redis.rpush(redisKey, JSON.stringify(callerIdStore)), redis.set(redisUserWallet, JSON.stringify(wallet))]) // If not found, add it
         }
 
         httpResponse(req, res, responseMessage.SUCCESS.code, callerIdToSend, null, 'custom')
