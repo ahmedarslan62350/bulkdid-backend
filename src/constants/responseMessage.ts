@@ -5,7 +5,7 @@ export default {
     NO_CONTENT: { code: 204, message: `No content available` },
     BAD_REQUEST: { code: 400, message: `The request was invalid or cannot be served` },
     UNAUTHORIZED: { code: 401, message: `You are not authorized to perform this action` },
-    FORBIDDEN: { code: 403, message: `You are forbidden to perform this action` },
+    FORBIDDEN: { code: 403, message: `You are not alowwed to perform this action` },
     NOT_FOUND: { code: 404, message: (entity: string) => `The requested ${entity} was not found` },
     CONFLICT: { code: 409, message: `The requested resource already exists` },
     UNPROCESSABLE_ENTITY: { code: 422, message: `The request was well-formed but could not be followed due to semantic errors` },

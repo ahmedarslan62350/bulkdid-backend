@@ -9,16 +9,36 @@ import { CallerIdStoreModel, ICallerIdStore } from '../../models/CallerIdStore'
 import { redis } from '../../service/redisInstance'
 import { Iwallet, WalletModel } from '../../models/Wallet'
 import config from '../../config/config'
+import { IUser, UserModel } from '../../models/User'
+import { IStore, StoreModel } from '../../models/Store'
 
 export default async function fetchCalllerId(req: Request, res: Response, next: NextFunction) {
     try {
-        const { id } = req.params
-        if (!id) {
+        const { id, storeId } = req.params
+        if (!id || !storeId) {
             httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.VALIDATION_ERROR.LESS_DATA)
             return
         }
+        const strUser = await redis.get(`usersByStoreId:${storeId}`)
+        let user: IUser | null = JSON.parse(strUser as string) as IUser
 
-        const user = req.user!
+        if (!user) {
+            let strStore = await redis.get(`users:stores:${storeId}`)
+            if (!strStore) {
+                strStore = JSON.stringify(await StoreModel.findById(storeId))
+                await redis.set(`users:stores:${storeId}`, strStore)
+            }
+
+            const store = JSON.parse(strStore) as IStore
+            user = await UserModel.findById(store.ownerId)
+
+            if (!user) {
+                httpResponse(req, res, responseMessage.NOT_FOUND.code, responseMessage.NOT_FOUND.message('store owner'))
+                return
+            }
+            await redis.set(`usersByStoreId:${storeId}`, JSON.stringify(user))
+        }
+
         const stateCode = quicker.extractStatusCode(id)
         const redisKey = `users:callerIds:${user.email}`
         const redisUserWallet = `users:wallet:${user.email}`

@@ -8,6 +8,7 @@ export interface IStore extends Document {
     fetchRequests: number
     callerIdStores: [ObjectId]
     callerIds: number
+    agents: [{ ip: string; isAlowed: boolean;}]
     createdAt?: Date
     updatedAt?: Date
 }
@@ -42,7 +43,13 @@ const storeSchema = new Schema<IStore>(
         callerIds: {
             type: Number,
             default: 0
-        }
+        },
+        agents: [
+            {
+                ip: { type: String, required: true },
+                isAlowed: { type: Boolean, default: false },
+            }
+        ]
     },
     { timestamps: true }
 )

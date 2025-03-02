@@ -1,3 +1,4 @@
+import { syncRedisToMongo } from '../script/syncRedisToDB'
 import app from './app'
 import config from './config/config'
 import { initRateLimitter } from './config/rateLimitter'
@@ -27,6 +28,16 @@ void (async () => {
                 TIME_STAMP: new Date().toISOString()
             }
         })
+
+        // SETUP INTERVAL FOR MOVEING DATA REDIS TO DATABASE
+        setInterval(
+            () => {
+                syncRedisToMongo()
+                    .then(() => logger.info('syncRedisToMongo solved'))
+                    .catch(() => logger.error('Something went wrong in syncRedisToMongo'))
+            },
+            1000 * 60 * Number(config.TIME_TO_UPDATE_DB_BY_REDIS)
+        )
     } catch (error) {
         logger.error('APPLICATION_ERROR', error)
 
