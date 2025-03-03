@@ -10,7 +10,7 @@ export interface Iwallet extends Document {
     accountNumber: string
     BAT: number
     BBT: number
-    transactions: [ObjectId]
+    transactions: ObjectId[]
     createdAt?: Date
     updatedAt?: Date
 }

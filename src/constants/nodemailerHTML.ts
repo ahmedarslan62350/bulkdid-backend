@@ -19,5 +19,9 @@ export default {
     deleteAccount: (name: string) => `
                 <h1>Hey ${name}!</h1>
                 <p>You have deleted your account</p>
-            `            
+            `,
+    transaction: (name: string, message: string) => `
+                <h1>Hey ${name}!</h1>
+                <p>You have ${message}</p>
+            `
 }

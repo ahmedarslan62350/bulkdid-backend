@@ -14,6 +14,8 @@ import upload from './file/upload'
 import fetchCalllerId from './callerId/fetch'
 import { getAllCallerIds, getCallerIdsByStateName } from './callerId/getCallerIds'
 import downloadFile from './file/download'
+import withdraw from './wallet/withdraw'
+import deposite from './wallet/deposite'
 
 export default {
     self: (req: Request, res: Response, NextFn: NextFunction) => {
@@ -35,6 +37,8 @@ export default {
             httpError(NextFn, error, req, responseMessage.INTERNAL_SERVER_ERROR.code)
         }
     },
+
+    // AUTH
     register,
     verify,
     resend,
@@ -42,9 +46,15 @@ export default {
     logout,
     _delete,
     updatePassword,
+
+    // FILE & CALLERIDS
     uploadFile:upload,
     fetchCalllerId,
     getAllCallerIds,
     getCallerIdsByStateName,
     downloadFile,
+
+    // WALLET & TRANSACTIONS
+    withdraw,
+    deposite,
 }

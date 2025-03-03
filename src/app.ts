@@ -14,6 +14,7 @@ import fileRouter from './router/fileRouter'
 import { populateStates } from '../script/stateSeeder'
 import httpResponse from './utils/httpResponse'
 import callerIdRouter from './router/callerIdRouter'
+import walletRouter from './router/walletRouter'
 
 const app: Application = express()
 
@@ -38,6 +39,7 @@ app.post('/api/v1/db', rateLimit, async () => {
 })
 app.use('/api/v1/auth', rateLimit, authRouter)
 app.use('/api/v1/file', rateLimit, isAuthenticated, fileRouter)
+app.use('/api/v1/wallet', rateLimit, isAuthenticated, walletRouter)
 app.use('/api/v1/callerId', callerIdRouter)
 
 app.post('/api/v1/db/populate', rateLimit, async (req, res) => {

@@ -4,9 +4,9 @@ export interface IStore extends Document {
     _id: ObjectId
     name: string
     ownerId: ObjectId
-    files: [ObjectId]
+    files: ObjectId[]
     fetchRequests: number
-    callerIdStores: [ObjectId]
+    callerIdStores: ObjectId[]
     callerIds: number
     agents: [{ ip: string; isAlowed: boolean;}]
     createdAt?: Date
