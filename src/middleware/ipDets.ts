@@ -1,23 +1,10 @@
 import { NextFunction, Request, Response } from 'express'
 import logger from '../utils/logger'
 import { redis } from '../service/redisInstance'
-import { IStore, StoreModel } from '../models/Store'
+import { StoreModel } from '../models/Store'
 import httpResponse from '../utils/httpResponse'
 import responseMessage from '../constants/responseMessage'
-
-export interface IGeoIP {
-    country: string
-    countryCode: string
-    region: string
-    regionName: string
-    city: string
-    zip: string
-    lat: number
-    lon: number
-    timezone: string
-    isp: string
-    org: string
-}
+import { IStore } from '../types/types'
 
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {

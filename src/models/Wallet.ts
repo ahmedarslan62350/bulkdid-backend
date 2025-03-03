@@ -1,21 +1,7 @@
-import mongoose, { ObjectId, Schema, Document } from 'mongoose'
+import mongoose, { Schema } from 'mongoose'
+import { IWallet } from '../types/types'
 
-export interface Iwallet extends Document {
-    _id: ObjectId
-    ownerId: ObjectId
-    totalTransactions: number
-    balance: number
-    withdraws: number
-    deposits: number
-    accountNumber: string
-    BAT: number
-    BBT: number
-    transactions: ObjectId[]
-    createdAt?: Date
-    updatedAt?: Date
-}
-
-const walletSchema = new Schema<Iwallet>(
+const walletSchema = new Schema<IWallet>(
     {
         ownerId: {
             type: mongoose.Schema.Types.ObjectId,
@@ -60,4 +46,4 @@ const walletSchema = new Schema<Iwallet>(
     { timestamps: true }
 )
 
-export const WalletModel = mongoose.model<Iwallet>('Wallet', walletSchema)
+export const WalletModel = mongoose.model<IWallet>('Wallet', walletSchema)

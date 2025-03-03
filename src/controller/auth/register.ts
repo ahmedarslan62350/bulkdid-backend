@@ -11,18 +11,12 @@ import registerSchema from '../../validations/register.validation'
 import nodeMailerHTML from '../../constants/nodemailerHTML'
 import { emailQueue } from '../../queues/emailQueue'
 import jwtVerification from '../../utils/jwtVerification'
+import { IRegisterBody } from '../../types/types'
 
-export interface IRegister {
-    email: string
-    password: string
-    confirmPassword: string
-    name: string
-    accountNumber: string
-}
 
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {
-        const data = (await req.body) as IRegister
+        const data = (await req.body) as IRegisterBody
 
         if (!data) {
             httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.VALIDATION_ERROR.LESS_DATA)

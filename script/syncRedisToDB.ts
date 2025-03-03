@@ -1,7 +1,8 @@
-import { CallerIdStoreModel, ICallerIdStore } from '../src/models/CallerIdStore'
-import { IStore, StoreModel } from '../src/models/Store'
-import { Iwallet, WalletModel } from '../src/models/Wallet'
+import { CallerIdStoreModel } from '../src/models/CallerIdStore'
+import { StoreModel } from '../src/models/Store'
+import { WalletModel } from '../src/models/Wallet'
 import { redis } from '../src/service/redisInstance'
+import { ICallerIdStore, IStore, IWallet } from '../src/types/types'
 import logger from '../src/utils/logger'
 
 export const syncRedisToMongo = async () => {
@@ -19,7 +20,7 @@ export const syncRedisToMongo = async () => {
             const walletString = await redis.get(key)
             if (!walletString) continue
 
-            const walletObj = JSON.parse(walletString) as Iwallet
+            const walletObj = JSON.parse(walletString) as IWallet
             walletBulkOps.push({
                 updateOne: {
                     filter: { _id: walletObj._id },

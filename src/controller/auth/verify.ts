@@ -9,11 +9,6 @@ import { emailQueue } from '../../queues/emailQueue'
 import nodemailerHTML from '../../constants/nodemailerHTML'
 import jwtVerification from '../../utils/jwtVerification'
 
-export interface IVerify {
-    verifyCode: string
-    email: string
-}
-
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {
         const cookies = req.cookies

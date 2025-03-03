@@ -5,12 +5,13 @@ import httpError from '../../utils/httpError'
 import responseMessage from '../../constants/responseMessage'
 import httpResponse from '../../utils/httpResponse'
 import quicker from '../../utils/quicker'
-import { CallerIdStoreModel, ICallerIdStore } from '../../models/CallerIdStore'
+import { CallerIdStoreModel } from '../../models/CallerIdStore'
 import { redis } from '../../service/redisInstance'
-import { Iwallet, WalletModel } from '../../models/Wallet'
+import { WalletModel } from '../../models/Wallet'
 import config from '../../config/config'
-import { IUser, UserModel } from '../../models/User'
-import { IStore, StoreModel } from '../../models/Store'
+import { UserModel } from '../../models/User'
+import { StoreModel } from '../../models/Store'
+import { ICallerIdStore, IStore, IUser, IWallet } from '../../types/types'
 
 export default async function fetchCalllerId(req: Request, res: Response, next: NextFunction) {
     try {
@@ -97,7 +98,7 @@ export default async function fetchCalllerId(req: Request, res: Response, next: 
         callerIdStore.fetchRequests++
 
         const strWallet = await redis.get(redisUserWallet)
-        let wallet: Iwallet
+        let wallet: IWallet
 
         if (!strWallet) {
             const walletFromDB = await WalletModel.findById(user.walletId)
@@ -110,7 +111,7 @@ export default async function fetchCalllerId(req: Request, res: Response, next: 
             await Promise.all([redis.set(redisUserWallet, JSON.stringify(walletFromDB))])
         }
 
-        wallet = JSON.parse(strWallet!) as Iwallet
+        wallet = JSON.parse(strWallet!) as IWallet
 
         if (wallet.balance < Number(config.COST_PER_CALLERID_FETCH)) {
             httpResponse(req, res, responseMessage.NOT_FOUND.code, responseMessage.NOT_FOUND.message('balance in wallet'))

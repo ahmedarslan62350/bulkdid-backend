@@ -1,19 +1,5 @@
-import mongoose, { ObjectId, Schema, Document } from 'mongoose'
-
-export interface ICallerIdStore extends Document {
-    _id: ObjectId
-    name: string
-    ownerId: ObjectId
-    storeId: ObjectId
-    callerIds: [number]
-    statusCodes: [number]
-    totalCallerIds: number
-    stateId: ObjectId
-    fetchRequests: number
-    index: number
-    createdAt?: Date
-    updatedAt?: Date
-}
+import mongoose, { Schema } from 'mongoose'
+import { ICallerIdStore } from '../types/types'
 
 const callerIdStoreSchema = new Schema<ICallerIdStore>(
     {

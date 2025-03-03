@@ -1,13 +1,10 @@
 import { NextFunction, Request, Response } from 'express'
 import httpError from '../../utils/httpError'
 import responseMessage from '../../constants/responseMessage'
-import { CallerIdStoreModel, ICallerIdStore } from '../../models/CallerIdStore'
+import { CallerIdStoreModel } from '../../models/CallerIdStore'
 import httpResponse from '../../utils/httpResponse'
 import { redis } from '../../service/redisInstance'
-
-export interface IGetCallerIdsByStateName {
-    stateName: string
-}
+import { ICallerIdStore, IGetCallerIdsByStateNameBody } from '../../types/types'
 
 export async function getAllCallerIds(req: Request, res: Response, next: NextFunction) {
     try {
@@ -45,7 +42,7 @@ export async function getAllCallerIds(req: Request, res: Response, next: NextFun
 export async function getCallerIdsByStateName(req: Request, res: Response, next: NextFunction) {
     try {
         const user = req.user!
-        const { stateName } = (await req.body) as IGetCallerIdsByStateName
+        const { stateName } = (await req.body) as IGetCallerIdsByStateNameBody
         if (!stateName) {
             httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.VALIDATION_ERROR.LESS_DATA)
             return

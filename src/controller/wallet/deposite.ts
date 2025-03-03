@@ -5,16 +5,11 @@ import { NextFunction, Request, Response } from 'express'
 import httpError from '../../utils/httpError'
 import responseMessage from '../../constants/responseMessage'
 import httpResponse from '../../utils/httpResponse'
-import { Iwallet, WalletModel } from '../../models/Wallet'
+import { WalletModel } from '../../models/Wallet'
 import { TransactionModel } from '../../models/Transaction'
 import { redis } from '../../service/redisInstance'
-import { IUser, UserModel } from '../../models/User'
-
-interface IBody {
-    comment?: string
-    amount: number
-    email: string
-}
+import { UserModel } from '../../models/User'
+import { IDepositeAndWithdrawBody, IUser, IWallet } from '../../types/types'
 
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {
@@ -24,7 +19,7 @@ export default async function (req: Request, res: Response, next: NextFunction) 
             return
         }
 
-        const { amount, comment, email } = req.body as IBody
+        const { amount, comment = '', email } = req.body as IDepositeAndWithdrawBody
         if (!amount || !email) {
             httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.VALIDATION_ERROR.LESS_DATA)
             return
@@ -33,7 +28,7 @@ export default async function (req: Request, res: Response, next: NextFunction) 
         const redisWalletKey = `users:wallet:${email}`
         const redisUserKey = `users:${email}`
         const redisWallet = await redis.get(redisWalletKey)
-        let wallet: Iwallet
+        let wallet: IWallet
         if (!redisWallet) {
             const strRedisUser = await redis.get(redisUserKey)
             if (!strRedisUser) {
@@ -43,13 +38,13 @@ export default async function (req: Request, res: Response, next: NextFunction) 
                     return
                 }
                 await redis.set(redisUserKey, JSON.stringify(user))
-                wallet = (await WalletModel.findById(user.walletId)) as Iwallet
+                wallet = (await WalletModel.findById(user.walletId)) as IWallet
             }
             const redisUser = JSON.parse(strRedisUser as string) as IUser
-            wallet = (await WalletModel.findById(redisUser.walletId)) as Iwallet
+            wallet = (await WalletModel.findById(redisUser.walletId)) as IWallet
         }
 
-        wallet = JSON.parse(redisWallet as string) as Iwallet
+        wallet = JSON.parse(redisWallet as string) as IWallet
 
         const transaction = new TransactionModel({
             comment,

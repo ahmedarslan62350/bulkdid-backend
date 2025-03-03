@@ -6,30 +6,14 @@ import { UserModel } from '../../models/User'
 import bcrypt from 'bcryptjs'
 import httpResponse from '../../utils/httpResponse'
 import loginSchema from '../../validations/login.validation'
-import { ObjectId } from 'mongoose'
 import jwtVerification from '../../utils/jwtVerification'
+import { IAccessTokenData, ILoginBody } from '../../types/types'
 
-export interface ILogin {
-    email: string
-    password: string
-}
 
-export interface IAccessTokenData {
-    _id: ObjectId
-    email: string
-    name: string
-    role: 'admin' | 'user'
-    walletId: ObjectId
-    store: ObjectId
-    isVerified: boolean
-    sessions: [string]
-    createdAt?: Date
-    updatedAt?: Date
-}
 
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {
-        const data = (await req.body) as ILogin
+        const data = (await req.body) as ILoginBody
 
         if (!data) {
             httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.VALIDATION_ERROR.LESS_DATA)

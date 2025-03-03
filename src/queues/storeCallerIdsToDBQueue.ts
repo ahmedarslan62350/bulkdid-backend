@@ -1,18 +1,12 @@
 import { Queue, Worker } from 'bullmq'
 import { redisConnection } from '../config/redis'
 import logger from '../utils/logger'
-import { IState, StateModel } from '../models/State'
+import { StateModel } from '../models/State'
 import { CallerIdStoreModel } from '../models/CallerIdStore'
 import mongoose, { isValidObjectId, ObjectId } from 'mongoose'
 import quicker from '../utils/quicker'
 import { StoreModel } from '../models/Store'
-import { IUser } from '../models/User'
-
-export interface IcallerIdsToStoreQueue {
-    callerIds: []
-    userId: string
-    user: IUser
-}
+import { IcallerIdsToStoreQueue, IState } from '../types/types'
 
 // Define Queue
 export const callerIdQueue = new Queue('process-caller-ids', { connection: redisConnection })

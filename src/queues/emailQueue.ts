@@ -2,12 +2,7 @@ import { Queue, Worker } from 'bullmq'
 import logger from '../utils/logger'
 import transporter from '../service/nodeMailer'
 import { redisConnection } from '../config/redis'
-
-export interface IEmailJob {
-    email: string
-    subject: string
-    html: string
-}
+import { IEmailJob } from '../types/types'
 
 export const emailQueue = new Queue('send-email', { connection: redisConnection })
 

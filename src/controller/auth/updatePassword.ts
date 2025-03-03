@@ -10,13 +10,7 @@ import jwtVerification from '../../utils/jwtVerification'
 import updatePasswordSchema from '../../validations/updatePassowrd.schema'
 import { JwtPayload } from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
-
-export interface IUpdatePassword {
-    currentPassword: string
-    newPassword: string
-    confirmPassword: string
-    logoutSessions: 'all' | 'current'
-}
+import { IUpdatePasswordBody } from '../../types/types'
 
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {
@@ -34,7 +28,7 @@ export default async function (req: Request, res: Response, next: NextFunction) 
             return
         }
 
-        const data = (await req.body) as IUpdatePassword
+        const data = (await req.body) as IUpdatePasswordBody
         if (!data) {
             httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.VALIDATION_ERROR.LESS_DATA)
             return

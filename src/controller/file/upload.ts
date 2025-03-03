@@ -1,6 +1,6 @@
 import { NextFunction, Response, Request } from 'express'
 import { UserModel } from '../../models/User'
-import { FileModel, IFile as IFileModel } from '../../models/File'
+import { FileModel } from '../../models/File'
 import { callerIdQueue } from '../../queues/storeCallerIdsToDBQueue'
 import { StoreModel } from '../../models/Store'
 import { WalletModel } from '../../models/Wallet'
@@ -11,14 +11,11 @@ import httpError from '../../utils/httpError'
 import httpResponse from '../../utils/httpResponse'
 import config from '../../config/config'
 import fs from 'fs'
-
-export interface IFile {
-    role: string
-}
+import { IFileBody, IFile as IFileModel } from '../../types/types'
 
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {
-        const { role } = (await req.body) as IFile
+        const { role } = (await req.body) as IFileBody
         const file = req.file
         const callerIds = req.file?.callerIds
 

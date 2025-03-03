@@ -3,14 +3,13 @@ import httpError from '../../utils/httpError'
 import responseMessage from '../../constants/responseMessage'
 import httpResponse from '../../utils/httpResponse'
 import { FileModel } from '../../models/File'
+import { IDownloadBody } from '../../types/types'
 
-interface IBody {
-    fileId: string
-}
+
 
 export default async function downloadFile(req: Request, res: Response, next: NextFunction) {
     try {
-        const { fileId } = req.body as IBody
+        const { fileId } = req.body as IDownloadBody
         if (!fileId) {
             httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.VALIDATION_ERROR.FIELD_REQUIRED('fileId'))
             return

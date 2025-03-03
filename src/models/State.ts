@@ -1,13 +1,5 @@
-import mongoose, { ObjectId, Schema, Document } from 'mongoose'
-
-export interface IState extends Document {
-    _id: ObjectId
-    name: string
-    statusCodes: [number]
-    callerIds: [number]
-    createdAt?: Date
-    updatedAt?: Date
-}
+import mongoose, { Schema } from 'mongoose'
+import { IState } from '../types/types'
 
 const stateSchema = new Schema<IState>(
     {

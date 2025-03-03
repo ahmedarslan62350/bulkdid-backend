@@ -1,17 +1,5 @@
-import mongoose, { ObjectId, Schema, Document } from 'mongoose'
-
-export interface IStore extends Document {
-    _id: ObjectId
-    name: string
-    ownerId: ObjectId
-    files: ObjectId[]
-    fetchRequests: number
-    callerIdStores: ObjectId[]
-    callerIds: number
-    agents: [{ ip: string; isAlowed: boolean;}]
-    createdAt?: Date
-    updatedAt?: Date
-}
+import mongoose, { Schema } from 'mongoose'
+import { IStore } from '../types/types'
 
 const storeSchema = new Schema<IStore>(
     {
@@ -47,7 +35,7 @@ const storeSchema = new Schema<IStore>(
         agents: [
             {
                 ip: { type: String, required: true },
-                isAlowed: { type: Boolean, default: false },
+                isAlowed: { type: Boolean, default: false }
             }
         ]
     },

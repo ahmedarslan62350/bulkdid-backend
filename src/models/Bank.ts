@@ -1,16 +1,5 @@
-import mongoose, { ObjectId, Schema, Document } from 'mongoose'
-
-export interface IBank extends Document {
-    _id: ObjectId
-    name: string
-    accountHolderName: string
-    accountNumber: number
-    icon: string
-    iconWidth: number
-    iconHeight: number
-    createdAt?: Date
-    updatedAt?: Date
-}
+import mongoose, { Schema } from 'mongoose'
+import { IBank } from '../types/types'
 
 const bankSchema = new Schema<IBank>(
     {

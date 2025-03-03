@@ -3,8 +3,8 @@ import logger from '../utils/logger'
 import httpResponse from '../utils/httpResponse'
 import responseMessage from '../constants/responseMessage'
 import jwtVerification from '../utils/jwtVerification'
-import { IAccessTokenData } from '../controller/auth/login'
 import { Request } from 'express'
+import { IAccessTokenData } from '../types/types'
 
 export default function (req: Request, res: Response, next: NextFunction) {
     try {

@@ -1,26 +1,9 @@
-import mongoose, { ObjectId, Schema, Document } from 'mongoose'
+import mongoose, { Schema } from 'mongoose'
 import jwt, { SignOptions } from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 import logger from '../utils/logger'
 import config from '../config/config'
-
-export interface IUser extends Document {
-    _id: ObjectId
-    name: string
-    email: string
-    password: string
-    role: 'admin' | 'user'
-    walletId: ObjectId
-    store: ObjectId
-    verifyCode: number | null
-    verifyCodeExpiry: Date | number | null
-    verifyCodeUsed: number
-    isVerified: boolean
-    createdAt?: Date
-    updatedAt?: Date
-    sessions: [string]
-    refreshToken: string
-}
+import { IUser } from '../types/types'
 
 const userSchema = new Schema<IUser>(
     {

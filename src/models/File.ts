@@ -1,20 +1,5 @@
-import mongoose, { ObjectId, Schema, Document } from 'mongoose'
-
-export interface IFile extends Document {
-    _id: ObjectId
-    ownerId: ObjectId
-    name: string
-    size: number
-    state: 'pending' | 'processing' | 'completed' | 'failed'
-    path: string | null
-    totalCallerIds: number
-    callerIds: [number]
-    type: 'xlsx' | 'csv' | '.csv' | '.xlsx'
-    role: 'checking-status' | 'fetching' | 'both'
-    downloads: number
-    createdAt?: Date
-    updatedAt?: Date
-}
+import mongoose, { Schema } from 'mongoose'
+import { IFile } from '../types/types'
 
 const fileSchema = new Schema<IFile>(
     {
