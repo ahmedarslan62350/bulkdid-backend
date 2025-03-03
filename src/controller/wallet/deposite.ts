@@ -27,7 +27,7 @@ export default async function (req: Request, res: Response, next: NextFunction) 
 
         const redisWalletKey = `users:wallet:${email}`
         const redisUserKey = `users:${email}`
-        const redisWallet = await redis.get(redisWalletKey)
+        let redisWallet = await redis.get(redisWalletKey)
         let wallet: IWallet
         if (!redisWallet) {
             const strRedisUser = await redis.get(redisUserKey)
@@ -37,14 +37,15 @@ export default async function (req: Request, res: Response, next: NextFunction) 
                     httpResponse(req, res, responseMessage.NOT_FOUND.code, responseMessage.NOT_FOUND.message('user'))
                     return
                 }
-                await redis.set(redisUserKey, JSON.stringify(user))
                 wallet = (await WalletModel.findById(user.walletId)) as IWallet
+                await Promise.all([redis.set(redisUserKey, JSON.stringify(user))])
             }
             const redisUser = JSON.parse(strRedisUser as string) as IUser
-            wallet = (await WalletModel.findById(redisUser.walletId)) as IWallet
+            redisWallet = JSON.stringify((await WalletModel.findById(redisUser.walletId)) as IWallet)
+            await redis.set(redisWalletKey, redisWallet)
         }
 
-        wallet = JSON.parse(redisWallet as string) as IWallet
+        wallet = JSON.parse(redisWallet) as IWallet
 
         const transaction = new TransactionModel({
             comment,
