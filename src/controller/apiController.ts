@@ -17,6 +17,9 @@ import downloadFile from './file/download'
 import withdraw from './wallet/withdraw'
 import deposite from './wallet/deposite'
 import getAllTransactions from './wallet/getTransactions'
+import details from './userStore/details'
+import getCallerIdStores from './userStore/getCallerIdStores'
+import update from './userStore/update'
 
 export default {
     self: (req: Request, res: Response, NextFn: NextFunction) => {
@@ -49,7 +52,7 @@ export default {
     updatePassword,
 
     // FILE & CALLERIDS
-    uploadFile:upload,
+    uploadFile: upload,
     fetchCalllerId,
     getAllCallerIds,
     getCallerIdsByStateName,
@@ -58,5 +61,10 @@ export default {
     // WALLET & TRANSACTIONS
     withdraw,
     deposite,
-    getAllTransactions
+    getAllTransactions,
+
+    // USER_STORE
+    details,
+    getCallerIdStores,
+    update
 }
