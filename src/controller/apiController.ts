@@ -16,6 +16,7 @@ import { getAllCallerIds, getCallerIdsByStateName } from './callerId/getCallerId
 import downloadFile from './file/download'
 import withdraw from './wallet/withdraw'
 import deposite from './wallet/deposite'
+import getAllTransactions from './wallet/getTransactions'
 
 export default {
     self: (req: Request, res: Response, NextFn: NextFunction) => {
@@ -57,4 +58,5 @@ export default {
     // WALLET & TRANSACTIONS
     withdraw,
     deposite,
+    getAllTransactions
 }

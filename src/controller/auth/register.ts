@@ -17,21 +17,18 @@ import { IRegisterBody } from '../../types/types'
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {
         const data = (await req.body) as IRegisterBody
-
         if (!data) {
             httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.VALIDATION_ERROR.LESS_DATA)
             return
         }
 
         const { email, password, confirmPassword, name, accountNumber } = data
-
         if (!email || !password || !confirmPassword || !name || !accountNumber) {
             httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.VALIDATION_ERROR.LESS_DATA)
             return
         }
 
         const result = registerSchema.safeParse(data)
-
         if (!result.success) {
             httpResponse(req, res, responseMessage.BAD_REQUEST.code, result.error?.errors[0]?.message)
             return
@@ -43,7 +40,6 @@ export default async function (req: Request, res: Response, next: NextFunction) 
         }
 
         const user = await UserModel.findOne({ email })
-
         if (user) {
             httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.VALIDATION_ERROR.EMAIL_ALREADY_EXISTS)
             return

@@ -5,11 +5,12 @@ import { StoreModel } from '../models/Store'
 import httpResponse from '../utils/httpResponse'
 import responseMessage from '../constants/responseMessage'
 import { IStore } from '../types/types'
+import { REDIS_USERS_STORE_KEY } from '../constants/redisKeys'
 
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {
         const { storeId } = req.params
-        const redisKey = `users:stores:${storeId}`
+        const redisKey = REDIS_USERS_STORE_KEY(storeId)
         let strStoreDets = await redis.get(redisKey)
         // If data is not in redis
         if (!strStoreDets) {

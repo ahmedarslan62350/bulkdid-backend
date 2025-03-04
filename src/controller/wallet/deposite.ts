@@ -10,6 +10,7 @@ import { TransactionModel } from '../../models/Transaction'
 import { redis } from '../../service/redisInstance'
 import { UserModel } from '../../models/User'
 import { IDepositeAndWithdrawBody, IUser, IWallet } from '../../types/types'
+import { REDIS_USER_KEY, REDIS_WALLET_KEY } from '../../constants/redisKeys'
 
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {
@@ -25,27 +26,26 @@ export default async function (req: Request, res: Response, next: NextFunction) 
             return
         }
 
-        const redisWalletKey = `users:wallet:${email}`
-        const redisUserKey = `users:${email}`
+        const redisWalletKey = REDIS_WALLET_KEY(email)
+        const redisUserKey = REDIS_USER_KEY(email)
         let redisWallet = await redis.get(redisWalletKey)
-        let wallet: IWallet
         if (!redisWallet) {
-            const strRedisUser = await redis.get(redisUserKey)
+            let strRedisUser = await redis.get(redisUserKey)
             if (!strRedisUser) {
                 const user = await UserModel.findOne({ email })
                 if (!user) {
                     httpResponse(req, res, responseMessage.NOT_FOUND.code, responseMessage.NOT_FOUND.message('user'))
                     return
                 }
-                wallet = (await WalletModel.findById(user.walletId)) as IWallet
-                await Promise.all([redis.set(redisUserKey, JSON.stringify(user))])
+                strRedisUser = JSON.stringify(user)
+                await redis.set(redisUserKey, strRedisUser)
             }
-            const redisUser = JSON.parse(strRedisUser as string) as IUser
+            const redisUser = JSON.parse(strRedisUser) as IUser
             redisWallet = JSON.stringify((await WalletModel.findById(redisUser.walletId)) as IWallet)
             await redis.set(redisWalletKey, redisWallet)
         }
 
-        wallet = JSON.parse(redisWallet) as IWallet
+        const wallet = JSON.parse(redisWallet) as IWallet
 
         const transaction = new TransactionModel({
             comment,

@@ -1,3 +1,4 @@
+import { REDIS_CALLERID_KEY, REDIS_USERS_STORE_KEY, REDIS_WALLET_KEY } from '../src/constants/redisKeys'
 import { CallerIdStoreModel } from '../src/models/CallerIdStore'
 import { StoreModel } from '../src/models/Store'
 import { WalletModel } from '../src/models/Wallet'
@@ -7,13 +8,13 @@ import logger from '../src/utils/logger'
 
 export const syncRedisToMongo = async () => {
     try {
-        const walletKeys = await redis.keys('users:wallet:*')
+        const walletKeys = await redis.keys(REDIS_WALLET_KEY('*'))
         const walletBulkOps = []
 
-        const callerIdStoreKeys = await redis.keys('users:callerIds:*')
+        const callerIdStoreKeys = await redis.keys(REDIS_CALLERID_KEY('*'))
         const callerIdStoreBulkOps = []
 
-        const storeKeys = await redis.keys('users:stores:*')
+        const storeKeys = await redis.keys(REDIS_USERS_STORE_KEY('*'))
         const storeBulkOps = []
 
         for (const key of walletKeys) {

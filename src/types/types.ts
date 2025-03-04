@@ -26,6 +26,20 @@ export type THttpError = {
     trace?: object | null
 }
 
+export interface IGeoIP {
+    country: string
+    countryCode: string
+    region: string
+    regionName: string
+    city: string
+    zip: string
+    lat: number
+    lon: number
+    timezone: string
+    isp: string
+    org: string
+}
+
 export interface IEmailJob {
     email: string
     subject: string
@@ -203,16 +217,7 @@ export interface IDepositeAndWithdrawBody {
     email: string
 }
 
-export interface IGeoIP {
-    country: string
-    countryCode: string
-    region: string
-    regionName: string
-    city: string
-    zip: string
-    lat: number
-    lon: number
-    timezone: string
-    isp: string
-    org: string
+export interface IGetTransactions{
+    index?: number
+    length?: number
 }

@@ -12,6 +12,7 @@ import config from '../../config/config'
 import { UserModel } from '../../models/User'
 import { StoreModel } from '../../models/Store'
 import { ICallerIdStore, IStore, IUser, IWallet } from '../../types/types'
+import { REDIS_CALLERID_KEY, REDIS_USERS_BY_STORE_KEY, REDIS_USERS_STORE_KEY, REDIS_WALLET_KEY } from '../../constants/redisKeys'
 
 export default async function fetchCalllerId(req: Request, res: Response, next: NextFunction) {
     try {
@@ -20,14 +21,18 @@ export default async function fetchCalllerId(req: Request, res: Response, next: 
             httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.VALIDATION_ERROR.LESS_DATA)
             return
         }
-        const strUser = await redis.get(`usersByStoreId:${storeId}`)
+
+        const usersByStoreIdKey = REDIS_USERS_BY_STORE_KEY(storeId)
+        const userStoreKey = REDIS_USERS_STORE_KEY(storeId)
+
+        const strUser = await redis.get(usersByStoreIdKey)
         let user: IUser | null = JSON.parse(strUser as string) as IUser
 
         if (!user) {
-            let strStore = await redis.get(`users:stores:${storeId}`)
+            let strStore = await redis.get(userStoreKey)
             if (!strStore) {
                 strStore = JSON.stringify(await StoreModel.findById(storeId))
-                await redis.set(`users:stores:${storeId}`, strStore)
+                await redis.set(userStoreKey, strStore)
             }
 
             const store = JSON.parse(strStore) as IStore
@@ -37,12 +42,13 @@ export default async function fetchCalllerId(req: Request, res: Response, next: 
                 httpResponse(req, res, responseMessage.NOT_FOUND.code, responseMessage.NOT_FOUND.message('store owner'))
                 return
             }
-            await redis.set(`usersByStoreId:${storeId}`, JSON.stringify(user))
+            await redis.set(usersByStoreIdKey, JSON.stringify(user))
         }
 
+        const redisKey = REDIS_CALLERID_KEY(user.email)
+        const redisUserWallet = REDIS_WALLET_KEY(user.email)
+
         const stateCode = quicker.extractStatusCode(id)
-        const redisKey = `users:callerIds:${user.email}`
-        const redisUserWallet = `users:wallet:${user.email}`
         const redisCallerIdStores = await redis.lrange(redisKey, 0, -1)
 
         if (!redisCallerIdStores.length) {

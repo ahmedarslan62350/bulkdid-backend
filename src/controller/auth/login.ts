@@ -8,37 +8,35 @@ import httpResponse from '../../utils/httpResponse'
 import loginSchema from '../../validations/login.validation'
 import jwtVerification from '../../utils/jwtVerification'
 import { IAccessTokenData, ILoginBody } from '../../types/types'
-
-
+import { redis } from '../../service/redisInstance'
+import { REDIS_USER_KEY } from '../../constants/redisKeys'
 
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {
         const data = (await req.body) as ILoginBody
-
         if (!data) {
             httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.VALIDATION_ERROR.LESS_DATA)
             return
         }
 
         const { email, password } = data
-
         if (!email || !password) {
             httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.VALIDATION_ERROR.LESS_DATA)
             return
         }
-        const result = loginSchema.safeParse(data)
 
+        const result = loginSchema.safeParse(data)
         if (!result.success) {
             httpResponse(req, res, responseMessage.BAD_REQUEST.code, result.error?.errors[0]?.message)
             return
         }
 
         const user = await UserModel.findOne({ email })
-
         if (!user) {
             httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.VALIDATION_ERROR.EMAIL_INVALID)
             return
         }
+
         const isPasswordMatch = await bcrypt.compare(password, user.password)
         if (!isPasswordMatch) {
             httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.VALIDATION_ERROR.PASSWORD_MISMATCH)
@@ -64,7 +62,7 @@ export default async function (req: Request, res: Response, next: NextFunction) 
         const accessToken = jwtVerification.signJWT(accessTokenData, { expiresIn: '30min' })
         const refreshToken = jwtVerification.signJWT(refreshTokenData, { expiresIn: '30d' })
 
-        if(!accessToken || !refreshToken){
+        if (!accessToken || !refreshToken) {
             httpResponse(req, res, responseMessage.INTERNAL_SERVER_ERROR.code, 'Error signing jwt token')
             return
         }
@@ -75,7 +73,7 @@ export default async function (req: Request, res: Response, next: NextFunction) 
         user.refreshToken = refreshToken as string
         user.sessions.push(ip)
 
-        await user.save()
+        await Promise.all([user.save(), redis.set(REDIS_USER_KEY(user.email), JSON.stringify(user))])
         httpResponse(req, res, responseMessage.SUCCESS.code, responseMessage.SUCCESS.message, {
             success: true,
             message: 'User logined successfully'

@@ -6,6 +6,8 @@ import { UserModel } from '../../models/User'
 import httpResponse from '../../utils/httpResponse'
 import { JwtPayload } from 'jsonwebtoken'
 import jwtVerification from '../../utils/jwtVerification'
+import { redis } from '../../service/redisInstance'
+import { REDIS_USER_KEY } from '../../constants/redisKeys'
 
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {
@@ -16,7 +18,7 @@ export default async function (req: Request, res: Response, next: NextFunction) 
         }
 
         const { token } = cookies
-        
+
         const decodedData = jwtVerification.verifyJWT(token as string) as JwtPayload
         if (!decodedData) {
             httpResponse(req, res, responseMessage.UNAUTHORIZED.code, responseMessage.UNAUTHORIZED.message)
@@ -34,7 +36,7 @@ export default async function (req: Request, res: Response, next: NextFunction) 
         user.refreshToken = ''
 
         res.clearCookie('token')
-        await user.save()
+        await Promise.all([user.save(), redis.del(REDIS_USER_KEY(user.email))])
 
         httpResponse(req, res, responseMessage.SUCCESS.code, responseMessage.SUCCESS.message, {
             success: true,

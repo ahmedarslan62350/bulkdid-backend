@@ -5,12 +5,13 @@ import { CallerIdStoreModel } from '../../models/CallerIdStore'
 import httpResponse from '../../utils/httpResponse'
 import { redis } from '../../service/redisInstance'
 import { ICallerIdStore, IGetCallerIdsByStateNameBody } from '../../types/types'
+import { REDIS_CALLERID_KEY } from '../../constants/redisKeys'
 
 export async function getAllCallerIds(req: Request, res: Response, next: NextFunction) {
     try {
         const user = req.user!
         const callerIdsToSend = []
-         const redisKey = `user:callerIds:${user.email}`
+        const redisKey = REDIS_CALLERID_KEY(user.email)
         const redisStores = await redis.lrange(redisKey, 0, -1)
 
         if (!redisStores.length) {
@@ -49,7 +50,7 @@ export async function getCallerIdsByStateName(req: Request, res: Response, next:
         }
 
         const callerIdsToSend: number[] = []
-         const redisKey = `user:callerIds:${user.email}`
+        const redisKey = REDIS_CALLERID_KEY(user.email)
         const redisStores = await redis.lrange(redisKey, 0, -1)
 
         if (!redisStores.length) {
