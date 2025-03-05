@@ -1,5 +1,9 @@
 import os from 'os'
 import config from '../config/config'
+import axios from 'axios'
+import { IGeoIP } from '../types/types'
+
+const ipDetailsUrl = config.GEOLOCATION_API_URL || 'http://ip-api.com/json'
 
 export default {
     getSystemDetails: () => {
@@ -25,4 +29,8 @@ export default {
         const ans = callerId.length === 11 ? parseInt(callerId.slice(1, 4)) : parseInt(callerId.slice(0, 3))
         return Number(ans)
     },
+    getIpDetails: async (ip: string): Promise<IGeoIP> => {
+        const res = await axios.get(`${ipDetailsUrl}/${ip}`)
+        return res.data as IGeoIP
+    }
 }

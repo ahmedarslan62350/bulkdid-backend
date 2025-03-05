@@ -6,12 +6,12 @@ import { WalletModel } from '../../models/Wallet'
 import { TransactionModel } from '../../models/Transaction'
 import { redis } from '../../service/redisInstance'
 import { REDIS_USERS_TRANSACTIONS_KEY, REDIS_WALLET_KEY } from '../../constants/redisKeys'
-import { IGetTransactions, ITransaction, IWallet } from '../../types/types'
+import { IGetLengthByIndex, ITransaction, IWallet } from '../../types/types'
 
 export default async function getAllTransactions(req: Request, res: Response, next: NextFunction) {
     try {
         const user = req.user!
-        const { index = 0, length = 10 } = req.body as IGetTransactions
+        const { index = 0, length = 10 } = req.body as IGetLengthByIndex
 
         const redisWalletKey = REDIS_WALLET_KEY(user.email)
         const redisTransactionKey = REDIS_USERS_TRANSACTIONS_KEY(user.email)

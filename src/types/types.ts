@@ -70,8 +70,8 @@ export interface ICallerIdStore extends Document {
     name: string
     ownerId: ObjectId
     storeId: ObjectId
-    callerIds: [number]
-    statusCodes: [number]
+    callerIds: number[]
+    statusCodes: number[]
     totalCallerIds: number
     stateId: ObjectId
     fetchRequests: number
@@ -88,7 +88,7 @@ export interface IFile extends Document {
     state: 'pending' | 'processing' | 'completed' | 'failed'
     path: string | null
     totalCallerIds: number
-    callerIds: [number]
+    callerIds: number[]
     type: 'xlsx' | 'csv' | '.csv' | '.xlsx'
     role: 'checking-status' | 'fetching' | 'both'
     downloads: number
@@ -99,8 +99,8 @@ export interface IFile extends Document {
 export interface IState extends Document {
     _id: ObjectId
     name: string
-    statusCodes: [number]
-    callerIds: [number]
+    statusCodes: number[]
+    callerIds: number[]
     createdAt?: Date
     updatedAt?: Date
 }
@@ -125,7 +125,7 @@ export interface IStore extends Document {
     fetchRequests: number
     callerIdStores: ObjectId[]
     callerIds: number
-    agents: [{ ip: string; isAlowed: boolean;}]
+    agents: { ip: string; isAlowed: boolean }[]
     createdAt?: Date
     updatedAt?: Date
 }
@@ -144,7 +144,7 @@ export interface IUser extends Document {
     isVerified: boolean
     createdAt?: Date
     updatedAt?: Date
-    sessions: [string]
+    sessions: string[]
     refreshToken: string
 }
 
@@ -163,8 +163,6 @@ export interface IWallet extends Document {
     updatedAt?: Date
 }
 
-
-
 // ROUTES
 export interface ILoginBody {
     email: string
@@ -179,7 +177,7 @@ export interface IAccessTokenData {
     walletId: ObjectId
     store: ObjectId
     isVerified: boolean
-    sessions: [string]
+    sessions: string[]
     createdAt?: Date
     updatedAt?: Date
 }
@@ -217,7 +215,16 @@ export interface IDepositeAndWithdrawBody {
     email: string
 }
 
-export interface IGetTransactions{
+export interface IUpdateProfileBody {
+    name?: string
+    sessions?: string[]
+}
+
+export interface IGetIpDetailsBody {
+    ip: string
+}
+
+export interface IGetLengthByIndex {
     index?: number
     length?: number
 }

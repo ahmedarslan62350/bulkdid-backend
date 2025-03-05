@@ -18,8 +18,11 @@ import withdraw from './wallet/withdraw'
 import deposite from './wallet/deposite'
 import getAllTransactions from './wallet/getTransactions'
 import details from './userStore/details'
+import getProfile from './profile/details'
 import getCallerIdStores from './userStore/getCallerIdStores'
 import update from './userStore/update'
+import getIpDetails from './profile/getIpDetails'
+import updateProfile from './profile/updateProfile'
 
 export default {
     self: (req: Request, res: Response, NextFn: NextFunction) => {
@@ -66,5 +69,10 @@ export default {
     // USER_STORE
     details,
     getCallerIdStores,
-    update
+    update,
+
+    // PROFILE
+    getProfile,
+    getIpDetails,
+    updateProfile,
 }
