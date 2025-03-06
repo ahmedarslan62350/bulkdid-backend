@@ -3,7 +3,8 @@ import jwt, { SignOptions } from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 import logger from '../utils/logger'
 import config from '../config/config'
-import { IUser } from '../types/types'
+import { IAccessTokenData, IUser } from '../types/types'
+import jwtVerification from '../utils/jwtVerification'
 
 const userSchema = new Schema<IUser>(
     {
@@ -97,7 +98,6 @@ userSchema.methods.generateRefreshToken = async function (): Promise<boolean> {
         }
         const options: SignOptions = {
             expiresIn: '30d',
-            algorithm: 'ES256'
         }
 
         // eslint-disable-next-line
@@ -114,15 +114,21 @@ userSchema.methods.generateRefreshToken = async function (): Promise<boolean> {
 userSchema.methods.generateAccessToken = async function (): Promise<string | null> {
     try {
         const user = this as IUser
+
         const payload = {
             _id: user._id,
-            role: user.role,
+            email: user.email,
             name: user.name,
-            email: user.email
+            role: user.role,
+            walletId: user.walletId,
+            store: user.store,
+            isVerified: user.isVerified,
+            sessions: user.sessions,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt
         }
         const options: SignOptions = {
             expiresIn: '15m',
-            algorithm: 'ES256'
         }
 
         // eslint-disable-next-line
@@ -131,6 +137,28 @@ userSchema.methods.generateAccessToken = async function (): Promise<string | nul
         return token
     } catch (error) {
         logger.error('Error generating Access Token', { error })
+        return null
+    }
+}
+
+userSchema.methods.decodeAccessToken = function (token: string): IAccessTokenData | null {
+    try {
+        const data = jwtVerification.verifyJWT(token) as IAccessTokenData
+
+        return data
+    } catch (error) {
+        logger.error('Error decoding Access Token', { error })
+        return null
+    }
+}
+
+userSchema.methods.decodeRefreshToken = function (token: string): { _id: string } | null {
+    try {
+        const data = jwtVerification.verifyJWT(token) as { _id: string }
+
+        return data
+    } catch (error) {
+        logger.error('Error decoding Refresh Token', { error })
         return null
     }
 }

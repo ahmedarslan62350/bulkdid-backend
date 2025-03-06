@@ -3,16 +3,16 @@ import httpError from '../../utils/httpError'
 import responseMessage from '../../constants/responseMessage'
 import httpResponse from '../../utils/httpResponse'
 import { IGetLengthByIndex } from '../../types/types'
-import { UserModel } from '../../models/User'
+import { TransactionModel } from '../../models/Transaction'
 
-export default async function getAllUsers(req: Request, res: Response, next: NextFunction) {
+export default async function getAllTransactions(req: Request, res: Response, next: NextFunction) {
     try {
         const { index = 0, length = 10 } = req.body as IGetLengthByIndex
 
-        const users = await UserModel.find().select('-password -__v')
-        const paginatedUsers = users.slice(index * length, index * length + length)
+        const transactions = await TransactionModel.find()
+        const paginatedTransactions = transactions.slice(index * length, index * length + length)
 
-        httpResponse(req, res, responseMessage.SUCCESS.code, responseMessage.SUCCESS.message, { users: [...paginatedUsers] })
+        httpResponse(req, res, responseMessage.SUCCESS.code, responseMessage.SUCCESS.message, { transactions: [...paginatedTransactions] })
     } catch (error) {
         httpError(next, error, req, responseMessage.INTERNAL_SERVER_ERROR.code)
     }

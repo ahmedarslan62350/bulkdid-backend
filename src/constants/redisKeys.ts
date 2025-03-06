@@ -4,4 +4,5 @@ export const REDIS_USER_KEY = (email: string) => `users:${email}`
 export const REDIS_USERS_BY_STORE_KEY = (storeId: string) => `usersByStoreId:${storeId}`
 export const REDIS_USERS_STORE_KEY = (storeId: string) => `users:stores:${storeId}`
 export const REDIS_USERS_TRANSACTIONS_KEY = (email: string) => `users:transactions:${email}`
+export const REDIS_TRANSACTION_KEY = (id: string) => `transactions:${id}`
 export const REDIS_IP_KEY = (ip: string) => `IP:${ip}`

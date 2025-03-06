@@ -146,6 +146,9 @@ export interface IUser extends Document {
     updatedAt?: Date
     sessions: string[]
     refreshToken: string
+    comparePassword(candidatePassword: string): Promise<boolean>
+    generateRefreshToken(): Promise<boolean>
+    generateAccessToken(): Promise<string | null>
 }
 
 export interface IWallet extends Document {
@@ -222,6 +225,29 @@ export interface IUpdateProfileBody {
 
 export interface IGetIpDetailsBody {
     ip: string
+}
+
+export interface IDeleteUserBody {
+    userId: string
+}
+
+export interface IUpdateUserBody {
+    user: IUser
+}
+
+export interface IUpdateTransactionBody {
+    transaction: ITransaction
+}
+
+export interface IAddNewStateBody {
+    stateName: string
+    codes: number[]
+}
+
+export default interface IUpdateStateBody {
+    stateId: string
+    stateName: string
+    codes: number[]
 }
 
 export interface IGetLengthByIndex {

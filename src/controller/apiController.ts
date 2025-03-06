@@ -23,6 +23,16 @@ import getCallerIdStores from './userStore/getCallerIdStores'
 import update from './userStore/update'
 import getIpDetails from './profile/getIpDetails'
 import updateProfile from './profile/updateProfile'
+import getAllUsers from './admin/getUsers'
+import getAllWallets from './admin/getWallets'
+import updateState from './admin/updateState'
+import getAllTransactionsAdmin from './admin/getTransactions'
+import updateUser from './admin/updateUser'
+import getAllStates from './admin/getStates'
+import getAllFiles from './admin/getFiles'
+import getAllCallerIdStores from './admin/getCallerIdStores'
+import deleteUser from './admin/deleteUser'
+import addState from './admin/addState'
 
 export default {
     self: (req: Request, res: Response, NextFn: NextFunction) => {
@@ -75,4 +85,16 @@ export default {
     getProfile,
     getIpDetails,
     updateProfile,
+
+    // ADMIN
+    getAllUsers,
+    getAllWallets,
+    getAllTransactionsAdmin,
+    updateState,
+    updateUser,
+    getAllStates,
+    getAllFiles,
+    getAllCallerIdStores,
+    deleteUser,
+    addState
 }

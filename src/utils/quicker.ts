@@ -2,6 +2,7 @@ import os from 'os'
 import config from '../config/config'
 import axios from 'axios'
 import { IGeoIP } from '../types/types'
+import { redis } from '../service/redisInstance'
 
 const ipDetailsUrl = config.GEOLOCATION_API_URL || 'http://ip-api.com/json'
 
@@ -32,5 +33,12 @@ export default {
     getIpDetails: async (ip: string): Promise<IGeoIP> => {
         const res = await axios.get(`${ipDetailsUrl}/${ip}`)
         return res.data as IGeoIP
+    },
+    getIndexByRedisValue: async (listKey: string, value: string) => {
+        const list = await redis.lrange(listKey, 0, -1)
+
+        const index = list.indexOf(value)
+
+        return index !== -1 ? index : null
     }
 }

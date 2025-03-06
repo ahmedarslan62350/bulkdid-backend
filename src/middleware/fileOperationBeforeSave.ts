@@ -62,7 +62,7 @@ export default {
             req.file.callerIds = callerIds
             next()
         } catch (error) {
-            httpError(next, error, req, 500)
+            httpError(next, error, req, responseMessage.INTERNAL_SERVER_ERROR.code)
         }
     }
 }

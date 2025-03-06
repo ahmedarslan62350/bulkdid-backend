@@ -17,6 +17,8 @@ import callerIdRouter from './router/callerIdRouter'
 import walletRouter from './router/walletRouter'
 import userStoreRouter from './router/userStoreRouter'
 import profileRouter from './router/profileRouter'
+import adminRouter from './router/AdminRouter'
+import isAdmin from './middleware/isAdmin'
 
 const app: Application = express()
 
@@ -44,6 +46,7 @@ app.use('/api/v1/file', rateLimit, isAuthenticated, fileRouter)
 app.use('/api/v1/wallet', rateLimit, isAuthenticated, walletRouter)
 app.use('/api/v1/user-store', rateLimit, isAuthenticated, userStoreRouter)
 app.use('/api/v1/profile', rateLimit, isAuthenticated, profileRouter)
+app.use('/api/v1/admin', rateLimit, isAuthenticated, isAdmin, adminRouter)
 app.use('/api/v1/callerId', callerIdRouter)
 
 app.post('/api/v1/db/populate', rateLimit, async (req, res) => {
