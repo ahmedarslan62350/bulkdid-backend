@@ -17,7 +17,7 @@ import callerIdRouter from './router/callerIdRouter'
 import walletRouter from './router/walletRouter'
 import userStoreRouter from './router/userStoreRouter'
 import profileRouter from './router/profileRouter'
-import adminRouter from './router/AdminRouter'
+import adminRouter from './router/adminRouter'
 import isAdmin from './middleware/isAdmin'
 
 const app: Application = express()

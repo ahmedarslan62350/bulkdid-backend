@@ -8,7 +8,6 @@ import { CallerIdStoreModel } from '../../models/CallerIdStore'
 export default async function getAllCallerIdStores(req: Request, res: Response, next: NextFunction) {
     try {
         const { index = 0, length = 10 } = req.body as IGetLengthByIndex
-
         const callerIdStores = await CallerIdStoreModel.find()
         const paginatedCallerIdStores = callerIdStores.slice(index * length, index * length + length)
 

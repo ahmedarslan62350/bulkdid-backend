@@ -9,6 +9,7 @@ export default function (req: Request, res: Response, next: NextFunction) {
             httpResponse(req, res, responseMessage.FORBIDDEN.code, responseMessage.FORBIDDEN.message)
             return
         }
+        next()
     } catch (error) {
         httpError(next, error, req, responseMessage.INTERNAL_SERVER_ERROR.code)
     }

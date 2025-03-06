@@ -12,7 +12,11 @@ import { StateModel } from '../../models/State'
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {
         const { stateName, codes } = req.body as IAddNewStateBody
-
+        if (!stateName || !codes) {
+            httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.VALIDATION_ERROR.LESS_DATA)
+            return
+        }
+        
         const state = new StateModel({
             name: stateName,
             statusCodes: [...codes]

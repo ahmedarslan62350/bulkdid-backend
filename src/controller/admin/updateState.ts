@@ -12,9 +12,12 @@ import IUpdateStateBody, { IState } from '../../types/types'
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {
         const { stateId, stateName, codes } = req.body as IUpdateStateBody
+        if(!stateId || !stateName || !codes){
+            httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.VALIDATION_ERROR.LESS_DATA)
+            return
+        }
 
         const state = await StateModel.findByIdAndUpdate(stateId, { $set: { name: stateName, code: codes } }, { new: true })
-
         if (!state) {
             httpResponse(req, res, responseMessage.NOT_FOUND.code, responseMessage.NOT_FOUND.message('state'))
             return

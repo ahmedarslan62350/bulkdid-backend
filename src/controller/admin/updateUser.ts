@@ -12,13 +12,17 @@ import { IUpdateUserBody, IUser } from '../../types/types'
 
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {
-        const { user } = req.body as IUpdateUserBody
+        const { name, email, isVerified, sessions } = req.body as IUpdateUserBody
+        if (!isVerified || !sessions || !email || !name) {
+            httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.VALIDATION_ERROR.FIELD_REQUIRED('user'))
+            return
+        }
 
-        const redisUserKey = REDIS_USER_KEY(user.email)
+        const redisUserKey = REDIS_USER_KEY(email)
         let redisUser = await redis.get(redisUserKey)
 
         if (!redisUser) {
-            const dbUser = await UserModel.findByIdAndUpdate(user._id, { ...user })
+            const dbUser = await UserModel.findOneAndUpdate({ email }, { $set: { name, isVerified, sessions } }, { new: true })
             if (!dbUser) {
                 httpResponse(req, res, responseMessage.NOT_FOUND.code, responseMessage.NOT_FOUND.message('user'))
                 return
@@ -32,7 +36,11 @@ export default async function (req: Request, res: Response, next: NextFunction) 
 
         const updatedUser = {
             ...userToUpdate,
-            ...user
+            name,
+            email,
+            isVerified,
+            sessions,
+            updatedAt: new Date()
         }
 
         await redis.set(redisUserKey, JSON.stringify(updatedUser))

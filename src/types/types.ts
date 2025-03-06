@@ -232,7 +232,10 @@ export interface IDeleteUserBody {
 }
 
 export interface IUpdateUserBody {
-    user: IUser
+    name: string,
+    email: string,
+    sessions: [],
+    isVerified: boolean
 }
 
 export interface IUpdateTransactionBody {
