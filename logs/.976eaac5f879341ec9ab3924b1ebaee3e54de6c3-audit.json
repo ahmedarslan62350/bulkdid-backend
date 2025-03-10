@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": false,
+        "amount": 5
+    },
+    "auditLog": "D:\\Full-stack\\callerId-status-checker\\backend\\logs\\.976eaac5f879341ec9ab3924b1ebaee3e54de6c3-audit.json",
+    "files": [
+        {
+            "date": 1741533805788,
+            "name": "D:\\Full-stack\\callerId-status-checker\\backend\\logs\\development.2025-03-09.error.log",
+            "hash": "527ed897d49b2301875ffe4e1a885658580b4b1c855d9e0c7ed131b24c510737"
+        }
+    ],
+    "hashType": "sha256"
+}

@@ -33,6 +33,13 @@ import getAllFiles from './admin/getFiles'
 import getAllCallerIdStores from './admin/getCallerIdStores'
 import deleteUser from './admin/deleteUser'
 import addState from './admin/addState'
+import fileAnalytics from './analytics/files'
+import userAnalytics from './analytics/users'
+import transactionAnalytics from './analytics/transactions'
+import didsAnalytics from './analytics/dids'
+import fetchDidsAnalytics from './analytics/fetchDids'
+import infoLogs from './analytics/infoLogs'
+import errorLogs from './analytics/errorLogs'
 
 export default {
     self: (req: Request, res: Response, NextFn: NextFunction) => {
@@ -96,5 +103,14 @@ export default {
     getAllFiles,
     getAllCallerIdStores,
     deleteUser,
-    addState
+    addState,
+
+    // ANALYTICS
+    fileAnalytics,
+    userAnalytics,
+    transactionAnalytics,
+    didsAnalytics,
+    fetchDidsAnalytics,
+    infoLogs,
+    errorLogs
 }

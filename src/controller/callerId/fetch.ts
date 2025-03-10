@@ -12,7 +12,7 @@ import config from '../../config/config'
 import { UserModel } from '../../models/User'
 import { StoreModel } from '../../models/Store'
 import { ICallerIdStore, IStore, IUser, IWallet } from '../../types/types'
-import { REDIS_CALLERID_KEY, REDIS_USERS_BY_STORE_KEY, REDIS_USERS_STORE_KEY, REDIS_WALLET_KEY } from '../../constants/redisKeys'
+import { REDIS_CALLERID_KEY, REDIS_FETCH_DID_KEY, REDIS_USERS_BY_STORE_KEY, REDIS_USERS_STORE_KEY, REDIS_WALLET_KEY } from '../../constants/redisKeys'
 
 export default async function fetchCalllerId(req: Request, res: Response, next: NextFunction) {
     try {
@@ -25,17 +25,23 @@ export default async function fetchCalllerId(req: Request, res: Response, next: 
         const usersByStoreIdKey = REDIS_USERS_BY_STORE_KEY(storeId)
         const userStoreKey = REDIS_USERS_STORE_KEY(storeId)
 
+        const redisFetchDidKey = REDIS_FETCH_DID_KEY()
+
+        let strStore = await redis.get(userStoreKey)
+        let redisStore = JSON.parse(strStore! || '{}') as IStore
+
         const strUser = await redis.get(usersByStoreIdKey)
         let user: IUser | null = JSON.parse(strUser as string) as IUser
 
         if (!user) {
-            let strStore = await redis.get(userStoreKey)
             if (!strStore) {
                 strStore = JSON.stringify(await StoreModel.findById(storeId))
                 await redis.set(userStoreKey, strStore)
+                redisStore = JSON.parse(strStore) as IStore
             }
 
             const store = JSON.parse(strStore) as IStore
+            redisStore = store
             user = await UserModel.findById(store.ownerId)
 
             if (!user) {
@@ -102,7 +108,9 @@ export default async function fetchCalllerId(req: Request, res: Response, next: 
         }
 
         callerIdStore.fetchRequests++
-
+        if (Object.keys(redisStore).length !== 0) {
+            redisStore.fetchRequests++
+        }
         const strWallet = await redis.get(redisUserWallet)
         let wallet: IWallet
 
@@ -127,9 +135,19 @@ export default async function fetchCalllerId(req: Request, res: Response, next: 
         wallet.balance -= Number(config.COST_PER_CALLERID_FETCH)
 
         if (index !== -1) {
-            await Promise.all([redis.lset(redisKey, index, JSON.stringify(callerIdStore)), redis.set(redisUserWallet, JSON.stringify(wallet))])
+            await Promise.all([
+                redis.lset(redisKey, index, JSON.stringify(callerIdStore)),
+                redis.set(redisUserWallet, JSON.stringify(wallet)),
+                redis.set(userStoreKey, JSON.stringify(redisStore)),
+                redis.rpush(redisFetchDidKey, JSON.stringify({ ip: req.ip, timeStamp: Date.now() }))
+            ])
         } else {
-            await Promise.all([redis.rpush(redisKey, JSON.stringify(callerIdStore)), redis.set(redisUserWallet, JSON.stringify(wallet))]) // If not found, add it
+            await Promise.all([
+                redis.rpush(redisKey, JSON.stringify(callerIdStore)),
+                redis.set(redisUserWallet, JSON.stringify(wallet)),
+                redis.set(userStoreKey, JSON.stringify(redisStore)),
+                redis.rpush(redisFetchDidKey, JSON.stringify({ ip: req.ip, timeStamp: Date.now() }))
+            ]) // If not found, add it
         }
 
         httpResponse(req, res, responseMessage.SUCCESS.code, callerIdToSend, null, 'custom')

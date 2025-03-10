@@ -1,5 +1,5 @@
 import { createLogger, format, transports } from 'winston'
-import { ConsoleTransportInstance, FileTransportInstance } from 'winston/lib/winston/transports'
+import { ConsoleTransportInstance } from 'winston/lib/winston/transports'
 import util from 'util'
 import config from '../config/config'
 import { EApplicationEnvironment } from '../constants/application'
@@ -7,7 +7,7 @@ import path from 'path'
 import * as sourceMapSupport from 'source-map-support'
 import { red, yellow, blue, cyan, magenta, bgGreen } from 'colorette'
 import 'winston-mongodb'
-import { MongoDBTransportInstance } from 'winston-mongodb'
+import DailyRotateFile from 'winston-daily-rotate-file'
 
 // LINKING SUPPORT BETWEEN TYPESCRIPT AND JAVASCRIPT
 sourceMapSupport.install()
@@ -75,27 +75,27 @@ const fileLogFormat = format.printf((info) => {
         meta: logMeta
     }
 
-    return JSON.stringify(logData, null, 4)
+    return JSON.stringify(logData, null, 4) + '\n|||'
 })
 
-const fileTransport = (): Array<FileTransportInstance> => {
+const fileTransport = (): Array<DailyRotateFile> => {
     return [
-        new transports.File({
-            filename: path.join(__dirname, '../', '../', './logs', `${config.ENV}.log`),
+        new DailyRotateFile({
+            filename: path.join(__dirname, '../', '../', './logs', `${config.ENV}`), // Single file, no date in filename
             level: 'info',
-            format: format.combine(format.timestamp(), fileLogFormat)
-        })
-    ]
-}
+            format: format.combine(format.timestamp(), fileLogFormat),
+            maxSize: '100k',
+            maxFiles: '5',
+            extension: '.info.log',
+        }),
 
-const mongodbTransport = (): Array<MongoDBTransportInstance> => {
-    return [
-        new transports.MongoDB({
-            level: 'info',
-            db: config.DATABASE_URL as string,
-            metaKey: 'meta',
-            expireAfterSeconds: 3600 * 24 * 15,
-            collection: 'application-logs'
+        new DailyRotateFile({
+            filename: path.join(__dirname, '../', '../', './logs', `${config.ENV}`), // Single file, no date in filename
+            level: 'error',
+            format: format.combine(format.timestamp(), fileLogFormat),
+            maxSize: '100k',
+            maxFiles: '5',
+            extension: '.error.log'
         })
     ]
 }
@@ -104,5 +104,5 @@ export default createLogger({
     defaultMeta: {
         meta: {}
     },
-    transports: [...consoleTransport(), ...mongodbTransport(), ...fileTransport()]
+    transports: [...consoleTransport(), ...fileTransport()]
 })

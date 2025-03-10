@@ -87,9 +87,10 @@ export default async function (req: Request, res: Response, next: NextFunction) 
             // handeling double updating mongodb schemas in file-type both
             store.files.push(SFile._id)
             store.callerIds = store.callerIds + callerIds.length
-            await Promise.all([store.save(), SFile.save(), callerIdQueue.add('process-caller-ids', { callerIds, userId: user._id, user })])
+            await Promise.all([store.save(), callerIdQueue.add('process-caller-ids', { callerIds, userId: user._id, user })])
         }
 
+        await SFile.save()
         httpResponse(req, res, responseMessage.SUCCESS.code, responseMessage.SUCCESS.message, {
             success: true,
             message: 'File successfully uploaded'

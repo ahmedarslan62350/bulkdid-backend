@@ -10,7 +10,8 @@ export default (
     responseStatusCode: number,
     responseMessage: string | number,
     data: unknown = null,
-    type: 'default' | 'custom' = 'default'
+    type: 'default' | 'custom' = 'default',
+    isLoggerEnabled: boolean = true
 ): void => {
     const response: THttpResponse = {
         success: true,
@@ -25,8 +26,9 @@ export default (
     }
 
     // LOG
-
-    logger.info('CONTROLLER_RESPONCE', { meta: response })
+    if (isLoggerEnabled) {
+        logger.info('CONTROLLER_RESPONCE', { meta: response })
+    }
 
     // Production ENV check
     if (config.ENV === EApplicationEnvironment.PRODUCTION) {

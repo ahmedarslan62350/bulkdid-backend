@@ -52,6 +52,17 @@ export interface IcallerIdsToStoreQueue {
     user: IUser
 }
 
+export interface ILogMeta {
+    [key: string]: unknown
+}
+
+export interface ILogData {
+    level: string
+    message: string
+    timestamp: string
+    meta: ILogMeta
+}
+
 // MODELS
 export interface IBank extends Document {
     _id: ObjectId
@@ -232,9 +243,9 @@ export interface IDeleteUserBody {
 }
 
 export interface IUpdateUserBody {
-    name: string,
-    email: string,
-    sessions: [],
+    name: string
+    email: string
+    sessions: []
     isVerified: boolean
 }
 

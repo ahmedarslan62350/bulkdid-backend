@@ -19,6 +19,7 @@ import userStoreRouter from './router/userStoreRouter'
 import profileRouter from './router/profileRouter'
 import adminRouter from './router/adminRouter'
 import isAdmin from './middleware/isAdmin'
+import analyticsRouter from './router/analyticsRouter'
 
 const app: Application = express()
 
@@ -47,6 +48,7 @@ app.use('/api/v1/wallet', rateLimit, isAuthenticated, walletRouter)
 app.use('/api/v1/user-store', rateLimit, isAuthenticated, userStoreRouter)
 app.use('/api/v1/profile', rateLimit, isAuthenticated, profileRouter)
 app.use('/api/v1/admin', rateLimit, isAuthenticated, isAdmin, adminRouter)
+app.use('/api/v1/analytics', rateLimit, isAuthenticated, isAdmin, analyticsRouter)
 app.use('/api/v1/callerId', callerIdRouter)
 
 app.post('/api/v1/db/populate', rateLimit, async (req, res) => {
@@ -62,6 +64,7 @@ app.use((req: Request, _: Response, NextFn: NextFunction) => {
         httpError(NextFn, error, req, responseMessage.UNAUTHORIZED.code)
     }
 })
+
 app.use(globalErrorHandler)
 
 export default app
