@@ -12,6 +12,8 @@ import httpResponse from '../../utils/httpResponse'
 import config from '../../config/config'
 import fs from 'fs'
 import { IFileBody, IFile as IFileModel } from '../../types/types'
+import moment from 'moment'
+import { Types } from 'mongoose'
 
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {
@@ -27,6 +29,33 @@ export default async function (req: Request, res: Response, next: NextFunction) 
         const user = await UserModel.findById(req.user?._id)
         if (!user) {
             httpResponse(req, res, responseMessage.UNAUTHORIZED.code, responseMessage.UNAUTHORIZED.message)
+            return
+        }
+
+        const todayStart = moment().startOf('day').toDate()
+        const todayEnd = moment().endOf('day').toDate()
+
+        const store = await StoreModel.findOne({ _id: user.store }).populate({
+            path: 'files',
+            match: { createdAt: { $gte: todayStart, $lte: todayEnd } },
+            model: FileModel
+        })
+
+        if (!store) {
+            httpResponse(req, res, responseMessage.NOT_FOUND.code, responseMessage.NOT_FOUND.message('user store'))
+            return
+        }
+
+        const todayFiles = store.files.filter((file) => {
+            if (!(file instanceof Types.ObjectId) && '_id' in file) {
+                return file._id
+            }
+
+            return false // Skip ObjectIds
+        })
+
+        if (todayFiles.length >= Number(config.MAX_FILES)) {
+            httpResponse(req, res, responseMessage.SERVICE_UNAVAILABLE.code, responseMessage.SERVICE_UNAVAILABLE.message)
             return
         }
 
@@ -56,11 +85,6 @@ export default async function (req: Request, res: Response, next: NextFunction) 
                 return
             }
             wallet.balance -= totalCost
-            const store = await StoreModel.findById(user.store)
-            if (!store) {
-                httpResponse(req, res, responseMessage.NOT_FOUND.code, responseMessage.SERVICE_UNAVAILABLE.message)
-                return
-            }
             // CHECKING HANDLER e.g: handler(callerIDs).then(function){ ALL_THAT_BELOW }
             const pathToFileStore = join(__dirname, '../../../../uploads')
             const SFilePath = join(pathToFileStore, `${Date.now()}-${file.originalname}`)
@@ -78,11 +102,6 @@ export default async function (req: Request, res: Response, next: NextFunction) 
 
         if (role === 'fetching' || role === 'both') {
             // Fetching logic
-            const store = await StoreModel.findById(user.store)
-            if (!store) {
-                httpResponse(req, res, responseMessage.NOT_FOUND.code, responseMessage.SERVICE_UNAVAILABLE.message)
-                return
-            }
             // Creating and managing callerIdStores for specfic state
             // handeling double updating mongodb schemas in file-type both
             store.files.push(SFile._id)

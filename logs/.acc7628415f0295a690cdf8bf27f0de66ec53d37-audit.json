@@ -1,0 +1,20 @@
+{
+    "keep": {
+        "days": false,
+        "amount": 5
+    },
+    "auditLog": "D:\\Full-stack\\callerId-status-checker\\backend\\logs\\.acc7628415f0295a690cdf8bf27f0de66ec53d37-audit.json",
+    "files": [
+        {
+            "date": 1741598342798,
+            "name": "D:\\Full-stack\\callerId-status-checker\\backend\\logs\\development.2025-03-10.info.log",
+            "hash": "20e085ed8b699939f30aa02c609033c1c77bde1dac7bcb4d9f03d7eeb2cea21a"
+        },
+        {
+            "date": 1741603188107,
+            "name": "D:\\Full-stack\\callerId-status-checker\\backend\\logs\\development.2025-03-10.1.info.log",
+            "hash": "2fb098933ba1cc31de0e65fbef33f55fee95994d4c010d50e02b147f2b442d7e"
+        }
+    ],
+    "hashType": "sha256"
+}

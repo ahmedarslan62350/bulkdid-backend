@@ -54,6 +54,10 @@ const userSchema = new Schema<IUser>(
         verifyCodeUsed: {
             type: Number,
             default: 0
+        },
+        loginAttempts: {
+            type: Number,
+            default: 0
         }
     },
     { timestamps: true }
@@ -97,7 +101,7 @@ userSchema.methods.generateRefreshToken = async function (): Promise<boolean> {
             _id: user._id
         }
         const options: SignOptions = {
-            expiresIn: '30d',
+            expiresIn: (config.JWT_REFRESH_TOKEN_EXPIRATION_TIME as SignOptions['expiresIn']) || '30d'
         }
 
         // eslint-disable-next-line
@@ -128,7 +132,7 @@ userSchema.methods.generateAccessToken = async function (): Promise<string | nul
             updatedAt: user.updatedAt
         }
         const options: SignOptions = {
-            expiresIn: '15m',
+            expiresIn: (config.SESSION_TIMEOUT as SignOptions['expiresIn']) || '15m'
         }
 
         // eslint-disable-next-line

@@ -4,13 +4,14 @@ import responseMessage from '../../constants/responseMessage'
 import httpResponse from '../../utils/httpResponse'
 import { FileModel } from '../../models/File'
 import moment from 'moment'
+import config from '../../config/config'
 
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {
         const dbFiles = await FileModel.find({}, { createdAt: 1 , totalCallerIds:1})
 
         const today = moment().utc().startOf('day')
-        const lastMonth = moment().utc().subtract(1, 'month').startOf('day')
+        const lastMonth = moment().utc().subtract(Number(config.DATA_RETENTION_PERIOD), 'days').startOf('day')
 
         const todayFiles = dbFiles.filter((file) => moment(file.createdAt).utc().isSame(today, 'day'))
         const lastMonthFiles = dbFiles.filter((file) => moment(file.createdAt).utc().isAfter(lastMonth))

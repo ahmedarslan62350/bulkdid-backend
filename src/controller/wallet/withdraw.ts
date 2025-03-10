@@ -11,6 +11,7 @@ import { redis } from '../../service/redisInstance'
 import { UserModel } from '../../models/User'
 import { IDepositeAndWithdrawBody, IUser, IWallet } from '../../types/types'
 import { REDIS_USER_KEY, REDIS_WALLET_KEY } from '../../constants/redisKeys'
+import config from '../../config/config'
 
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {
@@ -45,7 +46,9 @@ export default async function (req: Request, res: Response, next: NextFunction) 
         }
 
         const wallet = JSON.parse(redisWallet) as IWallet
-        if (wallet.balance < amount) {
+        const tax = (amount * Number(config.TRANSACTION_FEE_IN_PERCENT)) / 100
+
+        if (wallet.balance < amount - tax) {
             httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.NOT_FOUND.message('enough amount'))
             return
         }
@@ -59,7 +62,7 @@ export default async function (req: Request, res: Response, next: NextFunction) 
             from: 'Admin'
         })
         wallet.BBT = wallet.balance
-        wallet.balance -= amount
+        wallet.balance -= amount + tax
         wallet.BAT = wallet.balance
         wallet.totalTransactions++
         wallet.withdraws++

@@ -1,0 +1,42 @@
+{
+    "level": "ERROR",
+    "message": "jwt expired",
+    "timestamp": "2025-03-10T09:22:45.240Z",
+    "meta": {}
+}
+|||
+{
+    "level": "ERROR",
+    "message": "jwt expired",
+    "timestamp": "2025-03-10T09:43:42.419Z",
+    "meta": {}
+}
+|||
+{
+    "level": "ERROR",
+    "message": "jwt expired",
+    "timestamp": "2025-03-10T09:59:52.913Z",
+    "meta": {}
+}
+|||
+{
+    "level": "ERROR",
+    "message": "jwt expired",
+    "timestamp": "2025-03-10T10:15:15.228Z",
+    "meta": {}
+}
+|||
+{
+    "level": "ERROR",
+    "message": "jwt expired",
+    "timestamp": "2025-03-10T10:31:10.141Z",
+    "meta": {}
+}
+|||
+{
+    "level": "ERROR",
+    "message": "jwt expired",
+    "timestamp": "2025-03-10T10:52:06.156Z",
+    "meta": {}
+}
+|||

@@ -12,6 +12,7 @@ import { redis } from '../../service/redisInstance'
 import { UserModel } from '../../models/User'
 import { IDepositeAndWithdrawBody, IUser, IWallet } from '../../types/types'
 import { REDIS_USER_KEY, REDIS_WALLET_KEY } from '../../constants/redisKeys'
+import config from '../../config/config'
 
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {
@@ -56,8 +57,10 @@ export default async function (req: Request, res: Response, next: NextFunction) 
             to: 'Admin',
             from: wallet.ownerId
         })
+
         wallet.BBT = wallet.balance
-        wallet.balance += amount
+        const tax = (amount * Number(config.TRANSACTION_FEE_IN_PERCENT)) / 100
+        wallet.balance += amount - tax
         wallet.BAT = wallet.balance
         wallet.totalTransactions++
         wallet.deposits++

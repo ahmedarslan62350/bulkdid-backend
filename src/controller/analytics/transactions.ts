@@ -4,13 +4,14 @@ import responseMessage from '../../constants/responseMessage'
 import httpResponse from '../../utils/httpResponse'
 import moment from 'moment'
 import { TransactionModel } from '../../models/Transaction'
+import config from '../../config/config'
 
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {
         const dbTransactions = await TransactionModel.find({}, { createdAt: 1 })
 
         const today = moment().utc().startOf('day')
-        const lastMonth = moment().utc().subtract(1, 'month').startOf('day')
+        const lastMonth = moment().utc().subtract(Number(config.DATA_RETENTION_PERIOD), 'days').startOf('day')
 
         const todayTransactions = dbTransactions.filter((transaction) => moment(transaction.createdAt).utc().isSame(today, 'day'))
         const lastMonthTransactions = dbTransactions.filter((transaction) => moment(transaction.createdAt).utc().isAfter(lastMonth))

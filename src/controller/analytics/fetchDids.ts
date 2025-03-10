@@ -4,6 +4,7 @@ import responseMessage from '../../constants/responseMessage'
 import httpResponse from '../../utils/httpResponse'
 import moment from 'moment'
 import { redis } from '../../service/redisInstance'
+import config from '../../config/config'
 
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {
@@ -17,10 +18,10 @@ export default async function (req: Request, res: Response, next: NextFunction) 
         let totalLast30DaysDids = 0
         const dailyDistribution: Record<string, number> = {}
 
-        for (let i = 0; i < 30; i++) {
+        for (let i = 0; i < Number(config.DATA_RETENTION_PERIOD); i++) {
             const date = moment().utc().subtract(i, 'days').format('YYYY-MM-DD')
             const redisKey = `analytics:fetchToday:${date}`
-            
+
             const fetchRequests = await redis.lrange(redisKey, 0, -1)
             dailyDistribution[date] = fetchRequests.length
             totalLast30DaysDids += fetchRequests.length

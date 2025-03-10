@@ -20,6 +20,7 @@ import profileRouter from './router/profileRouter'
 import adminRouter from './router/adminRouter'
 import isAdmin from './middleware/isAdmin'
 import analyticsRouter from './router/analyticsRouter'
+import serverRouter from './router/server'
 
 const app: Application = express()
 
@@ -49,6 +50,7 @@ app.use('/api/v1/user-store', rateLimit, isAuthenticated, userStoreRouter)
 app.use('/api/v1/profile', rateLimit, isAuthenticated, profileRouter)
 app.use('/api/v1/admin', rateLimit, isAuthenticated, isAdmin, adminRouter)
 app.use('/api/v1/analytics', rateLimit, isAuthenticated, isAdmin, analyticsRouter)
+app.use('/api/v1/server', rateLimit, isAuthenticated, isAdmin, serverRouter)
 app.use('/api/v1/callerId', callerIdRouter)
 
 app.post('/api/v1/db/populate', rateLimit, async (req, res) => {

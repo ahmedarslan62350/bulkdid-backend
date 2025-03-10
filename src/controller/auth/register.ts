@@ -13,7 +13,6 @@ import { emailQueue } from '../../queues/emailQueue'
 import jwtVerification from '../../utils/jwtVerification'
 import { IRegisterBody } from '../../types/types'
 
-
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {
         const data = (await req.body) as IRegisterBody
@@ -26,6 +25,10 @@ export default async function (req: Request, res: Response, next: NextFunction) 
         if (!email || !password || !confirmPassword || !name || !accountNumber) {
             httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.VALIDATION_ERROR.LESS_DATA)
             return
+        }
+
+        if (!config.IS_REGISTRATION_ENABLE) {
+            httpResponse(req, res, responseMessage.SERVICE_UNAVAILABLE.code, responseMessage.SERVICE_UNAVAILABLE.message)
         }
 
         const result = registerSchema.safeParse(data)
@@ -83,7 +86,7 @@ export default async function (req: Request, res: Response, next: NextFunction) 
             httpResponse(req, res, responseMessage.BAD_REQUEST.code, 'Error signing jwt token')
             return
         }
-        
+
         res.cookie('email', header)
 
         setTimeout(

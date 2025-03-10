@@ -1,0 +1,177 @@
+{
+    "level": "INFO",
+    "message": "RATE_LIMITER_INITIATED",
+    "timestamp": "2025-03-10T10:39:51.279Z",
+    "meta": {}
+}
+|||
+{
+    "level": "INFO",
+    "message": "DATABASE_CONNECTION",
+    "timestamp": "2025-03-10T10:39:51.281Z",
+    "meta": {
+        "CONNECTION_NAME": "bulkdid"
+    }
+}
+|||
+{
+    "level": "INFO",
+    "message": "SERVER_STARTED",
+    "timestamp": "2025-03-10T10:39:51.283Z",
+    "meta": {
+        "PORT": "3500",
+        "SERVER_URL": "http://localhost:3000",
+        "MESSAGE": "Server started successfully",
+        "TIME_STAMP": "2025-03-10T10:39:51.281Z"
+    }
+}
+|||
+{
+    "level": "INFO",
+    "message": "RATE_LIMITER_INITIATED",
+    "timestamp": "2025-03-10T10:41:06.216Z",
+    "meta": {}
+}
+|||
+{
+    "level": "INFO",
+    "message": "DATABASE_CONNECTION",
+    "timestamp": "2025-03-10T10:41:06.218Z",
+    "meta": {
+        "CONNECTION_NAME": "bulkdid"
+    }
+}
+|||
+{
+    "level": "INFO",
+    "message": "SERVER_STARTED",
+    "timestamp": "2025-03-10T10:41:06.220Z",
+    "meta": {
+        "PORT": "3500",
+        "SERVER_URL": "http://localhost:3000",
+        "MESSAGE": "Server started successfully",
+        "TIME_STAMP": "2025-03-10T10:41:06.218Z"
+    }
+}
+|||
+{
+    "level": "INFO",
+    "message": "CONTROLLER_RESPONCE",
+    "timestamp": "2025-03-10T10:41:06.665Z",
+    "meta": {
+        "success": true,
+        "status": 200,
+        "request": {
+            "ip": "::1",
+            "method": "POST",
+            "url": "/api/v1/server/details"
+        },
+        "message": "The operation has been successful",
+        "data": {
+            "stats": {
+                "db": "bulkdid",
+                "collections": 8,
+                "views": 0,
+                "objects": 47756,
+                "avgObjSize": 202.90648295502135,
+                "dataSize": 9690002,
+                "storageSize": 2629632,
+                "indexes": 11,
+                "indexSize": 1568768,
+                "totalSize": 4198400,
+                "scaleFactor": 1,
+                "fsUsedSize": 277921316864,
+                "fsTotalSize": 491013533696,
+                "ok": 1
+            },
+            "infoStats": {
+                "version": "7.0.12",
+                "uptime": 713634,
+                "connections": {
+                    "current": 17,
+                    "available": 999983
+                },
+                "memoryUsage": {
+                    "resident": "55 MB",
+                    "virtual": "4929 MB"
+                },
+                "network": {
+                    "bytesIn": "93.98 MB",
+                    "bytesOut": "74.17 MB",
+                    "numRequests": 266476
+                },
+                "operations": {
+                    "insert": 152375,
+                    "query": 1207,
+                    "update": 4881,
+                    "delete": 13
+                },
+                "storageEngine": "wiredTiger"
+            }
+        }
+    }
+}
+|||
+{
+    "level": "ERROR",
+    "message": "jwt expired",
+    "timestamp": "2025-03-10T10:52:06.156Z",
+    "meta": {}
+}
+|||
+{
+    "level": "INFO",
+    "message": "CONTROLLER_RESPONCE",
+    "timestamp": "2025-03-10T10:52:06.159Z",
+    "meta": {
+        "success": true,
+        "status": 401,
+        "request": {
+            "ip": "::1",
+            "method": "POST",
+            "url": "/api/v1/analytics/logs"
+        },
+        "message": "You are not authorized to perform this action",
+        "data": null
+    }
+}
+|||
+{
+    "level": "INFO",
+    "message": "CONTROLLER_RESPONCE",
+    "timestamp": "2025-03-10T10:52:12.116Z",
+    "meta": {
+        "success": true,
+        "status": 200,
+        "request": {
+            "ip": "::1",
+            "method": "POST",
+            "url": "/api/v1/auth/login"
+        },
+        "message": "The operation has been successful",
+        "data": {
+            "success": true,
+            "message": "User logined successfully"
+        }
+    }
+}
+|||
+{
+    "level": "INFO",
+    "message": "CONTROLLER_ERROR",
+    "timestamp": "2025-03-10T10:52:17.802Z",
+    "meta": {
+        "success": false,
+        "status": 401,
+        "message": "The requested route was not found",
+        "trace": {
+            "error": "Error: The requested route was not found\n    at D:\\Full-stack\\callerId-status-checker\\backend\\src\\app.ts:64:15\n    at Layer.handle [as handle_request] (D:\\Full-stack\\callerId-status-checker\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at trim_prefix (D:\\Full-stack\\callerId-status-checker\\backend\\node_modules\\express\\lib\\router\\index.js:328:13)\n    at D:\\Full-stack\\callerId-status-checker\\backend\\node_modules\\express\\lib\\router\\index.js:286:9\n    at Function.process_params (D:\\Full-stack\\callerId-status-checker\\backend\\node_modules\\express\\lib\\router\\index.js:346:12)\n    at next (D:\\Full-stack\\callerId-status-checker\\backend\\node_modules\\express\\lib\\router\\index.js:280:10)\n    at D:\\Full-stack\\callerId-status-checker\\backend\\node_modules\\express\\lib\\router\\index.js:646:15\n    at next (D:\\Full-stack\\callerId-status-checker\\backend\\node_modules\\express\\lib\\router\\index.js:265:14)\n    at Function.handle (D:\\Full-stack\\callerId-status-checker\\backend\\node_modules\\express\\lib\\router\\index.js:175:3)\n    at router (D:\\Full-stack\\callerId-status-checker\\backend\\node_modules\\express\\lib\\router\\index.js:47:12)\n    at Layer.handle [as handle_request] (D:\\Full-stack\\callerId-status-checker\\backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at trim_prefix (D:\\Full-stack\\callerId-status-checker\\backend\\node_modules\\express\\lib\\router\\index.js:328:13)\n    at D:\\Full-stack\\callerId-status-checker\\backend\\node_modules\\express\\lib\\router\\index.js:286:9\n    at Function.process_params (D:\\Full-stack\\callerId-status-checker\\backend\\node_modules\\express\\lib\\router\\index.js:346:12)\n    at next (D:\\Full-stack\\callerId-status-checker\\backend\\node_modules\\express\\lib\\router\\index.js:280:10)\n    at default_1 (D:\\Full-stack\\callerId-status-checker\\backend\\src\\middleware\\isAdmin.ts:12:9)"
+        },
+        "request": {
+            "ip": "::1",
+            "method": "POST",
+            "url": "/api/v1/analytics/logs"
+        }
+    }
+}
+|||

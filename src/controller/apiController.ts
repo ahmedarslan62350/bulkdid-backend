@@ -40,6 +40,7 @@ import didsAnalytics from './analytics/dids'
 import fetchDidsAnalytics from './analytics/fetchDids'
 import infoLogs from './analytics/infoLogs'
 import errorLogs from './analytics/errorLogs'
+import usage from './server/usage'
 
 export default {
     self: (req: Request, res: Response, NextFn: NextFunction) => {
@@ -112,5 +113,8 @@ export default {
     didsAnalytics,
     fetchDidsAnalytics,
     infoLogs,
-    errorLogs
+    errorLogs,
+
+    // SREVERS
+    usage
 }

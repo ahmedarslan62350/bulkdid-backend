@@ -63,6 +63,31 @@ export interface ILogData {
     meta: ILogMeta
 }
 
+export interface IMongoDBStats {
+    version: string
+    uptime: number | string
+    connections: {
+        current: number
+        available: number
+    }
+    memoryUsage: {
+        resident: string
+        virtual: string
+    }
+    network: {
+        bytesIn: string
+        bytesOut: string
+        numRequests: number
+    }
+    operations: {
+        insert: number
+        query: number
+        update: number
+        delete: number
+    }
+    storageEngine: string
+}
+
 // MODELS
 export interface IBank extends Document {
     _id: ObjectId
@@ -157,6 +182,7 @@ export interface IUser extends Document {
     updatedAt?: Date
     sessions: string[]
     refreshToken: string
+    loginAttempts: number
     comparePassword(candidatePassword: string): Promise<boolean>
     generateRefreshToken(): Promise<boolean>
     generateAccessToken(): Promise<string | null>
@@ -262,6 +288,15 @@ export default interface IUpdateStateBody {
     stateId: string
     stateName: string
     codes: number[]
+}
+
+export interface IAddBankBody {
+    name: string
+    accountHolderName: string
+    accountNumber: string
+    icon: string
+    iconWidth?: number
+    iconHeight?: number
 }
 
 export interface IGetLengthByIndex {

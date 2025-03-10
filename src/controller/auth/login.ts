@@ -8,6 +8,7 @@ import loginSchema from '../../validations/login.validation'
 import { ILoginBody } from '../../types/types'
 import { redis } from '../../service/redisInstance'
 import { REDIS_USER_KEY } from '../../constants/redisKeys'
+import config from '../../config/config'
 
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {
@@ -35,8 +36,14 @@ export default async function (req: Request, res: Response, next: NextFunction) 
             return
         }
 
+        if (user.loginAttempts >= Number(config.MAX_LOGIN_ATTEMPTS)) {
+            httpResponse(req, res, responseMessage.SERVICE_UNAVAILABLE.code, responseMessage.SERVICE_UNAVAILABLE.message)
+        }
+
         const isPasswordMatch = await user.comparePassword(password)
         if (!isPasswordMatch) {
+            user.loginAttempts += 1
+            await user.save()
             httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.VALIDATION_ERROR.PASSWORD_MISMATCH)
             return
         }
@@ -52,6 +59,7 @@ export default async function (req: Request, res: Response, next: NextFunction) 
         const ip = req?.ip ? req.ip : '127.0.0.1'
 
         res.cookie('token', accessToken)
+        user.loginAttempts = 0
         user.sessions.push(ip)
 
         await Promise.all([user.save(), redis.set(REDIS_USER_KEY(user.email), JSON.stringify(user))])
