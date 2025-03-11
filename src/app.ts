@@ -22,6 +22,9 @@ import isAdmin from './middleware/isAdmin'
 import analyticsRouter from './router/analyticsRouter'
 import serverRouter from './router/serverRouter'
 import bankRouter from './router/bankRouter'
+import CreateClient from './config/whatsappClient'
+import logger from './utils/logger'
+import { Client } from 'whatsapp-web.js'
 
 const app: Application = express()
 
@@ -70,5 +73,12 @@ app.use((req: Request, _: Response, NextFn: NextFunction) => {
 })
 
 app.use(globalErrorHandler)
+
+CreateClient()
+    .then((c) => (whatsappClient = c))
+    .catch((err) => logger.error(err))
+
+export let whatsappClient: Client | null = null
+
 
 export default app

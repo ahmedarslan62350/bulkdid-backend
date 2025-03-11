@@ -1,6 +1,7 @@
 import axios from 'axios'
 import logger from './logger'
 import config from '../config/config'
+import { CallerIdResponse } from '../types/types'
 
 const axiosInstance = axios.create({
     timeout: 5000, // Set a reasonable timeout
@@ -27,11 +28,6 @@ async function fetchWithRetry(url: string, retries: number = 0): Promise<string>
             throw error
         }
     }
-}
-
-interface CallerIdResponse {
-    callerId: string
-    status: string
 }
 
 export async function getTitle(url: string): Promise<CallerIdResponse> {

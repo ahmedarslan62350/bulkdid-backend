@@ -4,13 +4,9 @@ import responseMessage from '../../constants/responseMessage'
 import { REDIS_USERS_STORE_KEY } from '../../constants/redisKeys'
 import { redis } from '../../service/redisInstance'
 import { StoreModel } from '../../models/Store'
-import { IStore } from '../../types/types'
+import { IStore, IUpdateStoreBody } from '../../types/types'
 import httpResponse from '../../utils/httpResponse'
 
-interface IUpdateStoreBody {
-    name?: string
-    agents?: [{ ip: string; isAlowed: boolean }]
-}
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {
         const user = req.user!

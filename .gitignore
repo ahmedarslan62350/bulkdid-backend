@@ -3,3 +3,5 @@ dist
 .env.development
 .env.production
 logs
+.wwebjs_auth
+.wwebjs_cache

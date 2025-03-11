@@ -2,15 +2,13 @@ import pLimit from 'p-limit'
 import { getTitle } from './getTitle'
 import logger from './logger'
 import config from '../config/config'
+import { CallerIdResponse } from '../types/types'
 
 const limit = pLimit(5) // Limit to 5 concurrent requests
 const MAX_RETRIES: number = Number(config.MAX_RETRIES_NOROMBO_RES) // Maximum number of retries for rate limiting
 const URL = config.NOROMBO_URL
 
-interface CallerIdResponse {
-    callerId: string
-    status: string
-}
+
 
 async function fetchWithRetry(url: string, retries: number = MAX_RETRIES): Promise<CallerIdResponse> {
     try {

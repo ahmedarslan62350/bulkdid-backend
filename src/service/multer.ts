@@ -9,7 +9,12 @@ export const upload = multer({
     fileFilter: (req, file, cb) => {
         const allowedMimeTypes = [
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
-            'text/csv' // .csv
+            'text/csv',
+            'image/jpeg',
+            'image/pjpeg',
+            'image/png',
+            'image/gif',
+            'image/webp'
         ]
         const filetype = file.mimetype
         if (allowedMimeTypes.includes(filetype)) {

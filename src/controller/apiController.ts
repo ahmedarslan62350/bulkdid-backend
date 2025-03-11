@@ -45,6 +45,7 @@ import getBanks from './banks/getBanks'
 import addBank from './banks/addBank'
 import changeEnvVariable from './settings/changeEnvVariable'
 import getAllEnvVariables from './settings/getEnvVariables'
+import reqTransaction from './wallet/reqTransaction'
 
 export default {
     self: (req: Request, res: Response, NextFn: NextFunction) => {
@@ -87,6 +88,7 @@ export default {
     withdraw,
     deposite,
     getAllTransactions,
+    reqTransaction,
 
     // USER_STORE
     details,

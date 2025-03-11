@@ -10,11 +10,7 @@ import config from '../../config/config'
 import fs from 'fs'
 import logger from '../../utils/logger'
 import { exec } from 'child_process'
-
-export interface IChangeEnvVariableBody {
-    key: string
-    value: string
-}
+import { IChangeEnvVariableBody } from '../../types/types'
 
 const ENV_PATH = path.join(__dirname, '..', '..', '..', `.env.${config.ENV}`)
 

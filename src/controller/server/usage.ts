@@ -3,10 +3,8 @@ import httpError from '../../utils/httpError'
 import responseMessage from '../../constants/responseMessage'
 import httpResponse from '../../utils/httpResponse'
 import quicker from '../../utils/quicker'
+import { IServerUsageBody } from '../../types/types'
 
-interface IServerUsageBody {
-    name?: string
-}
 
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {

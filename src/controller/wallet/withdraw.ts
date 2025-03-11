@@ -15,12 +15,6 @@ import config from '../../config/config'
 
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {
-        const user = req.user!
-        if (user.role !== 'admin') {
-            httpResponse(req, res, responseMessage.FORBIDDEN.code, responseMessage.FORBIDDEN.message)
-            return
-        }
-
         const { amount, comment = '', email } = req.body as IDepositeAndWithdrawBody
         if (!amount || !email) {
             httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.VALIDATION_ERROR.LESS_DATA)

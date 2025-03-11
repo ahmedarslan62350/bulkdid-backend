@@ -56,6 +56,14 @@ export interface ILogMeta {
     [key: string]: unknown
 }
 
+export interface IServerUsageBody {
+    name?: string
+}
+
+export interface IReqTransactionBody {
+    type: 'deposite' | 'withdraw'
+}
+
 export interface ILogData {
     level: string
     message: string
@@ -86,6 +94,11 @@ export interface IMongoDBStats {
         delete: number
     }
     storageEngine: string
+}
+
+export interface CallerIdResponse {
+    callerId: string
+    status: string
 }
 
 // MODELS
@@ -297,6 +310,16 @@ export interface IAddBankBody {
     icon: string
     iconWidth?: number
     iconHeight?: number
+}
+
+export interface IChangeEnvVariableBody {
+    key: string
+    value: string
+}
+
+export interface IUpdateStoreBody {
+    name?: string
+    agents?: [{ ip: string; isAlowed: boolean }]
 }
 
 export interface IGetLengthByIndex {
