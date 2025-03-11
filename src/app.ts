@@ -25,6 +25,7 @@ import bankRouter from './router/bankRouter'
 import CreateClient from './config/whatsappClient'
 import logger from './utils/logger'
 import { Client } from 'whatsapp-web.js'
+import expressMongoSanitize from 'express-mongo-sanitize'
 
 const app: Application = express()
 
@@ -41,6 +42,7 @@ app.use(express.json())
 app.use(express.static(join(__dirname, '../', './public')))
 app.use(cookieParser())
 app.use(urlencoded({ extended: true }))
+app.use(expressMongoSanitize())
 
 // ROUTES
 app.use('/api/v1', rateLimit, router)

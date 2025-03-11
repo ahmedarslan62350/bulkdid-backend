@@ -1,0 +1,81 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    container_name: nodejs_app
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongodb
+      - redis
+    environment:
+      - ENV=development
+      - PORT=3500
+      - SERVER_URL=http://localhost:3000
+      - FRONTEND_URL=http://localhost:5173
+      - PM2_APP_NAME=my-app
+      - PM2_SCALE_CPU_USAGE=60
+      - DATABASE_URL=mongodb://127.0.0.1:27017/bulkdid
+      - DATABASE_NAME=bulkdid
+      - JWT_TOKEN_SECRET=ahmed
+      - JWT_REFRESH_TOKEN_EXPIRATION_TIME=120
+      - POINTS_PER_SECOND=10
+      - DURATION=60
+      - NODE_MAILER_USER=ahmedarslanarslan9@gmail.com
+      - NODE_MAILER_PASS=vild agli irpd cbpi
+      - ADMIN_EMAIL=ahmedarslanarslan9@gmail.com
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - OPENAI_API_KEY=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
+      - GEOLOCATION_API_URL=http://ip-api.com/json
+      - COST_PER_CALLERID_FETCH=0.02
+      - COST_PER_CALLERID_CHECK=0.01
+      - TIME_TO_UPDATE_LOG=15
+      - DEFAULT_BANK_ICON_WIDTH=30
+      - DEFAULT_BANK_ICON_HEIGHT=30
+      - IS_REGISTRATION_ENABLE=true
+      - PASSWORD_POLICY=basic
+      - SESSION_TIMEOUT=30m
+      - MAX_LOGIN_ATTEMPTS=5
+      - MAX_WITHDRAW=5
+      - MAX_DEPOSITS=5
+      - MAX_FILES=50
+      - TRANSACTION_FEE_IN_PERCENT=2.5
+      - DATA_RETENTION_PERIOD=10
+      - LOGS_PERSISTENT_FREQUENCY_IN_DAYS=3d
+      - BACKUP_FQ=daily
+      - CACHE_TTL_IN_SECONDS=1000
+      - MAX_RETRIES_NOROMBO_RES=3
+      - NOROMBO_URL=https://nomorobo.com/lookup
+      - WHATSAPP_RECEPENT_NUMBER=923447264464
+      - WHATSAPP_SERVICE_ENABLED=true
+    networks:
+      - app_network
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - app_network
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - app_network
+
+networks:
+  app_network:
+
+volumes:
+  mongodb_data:
