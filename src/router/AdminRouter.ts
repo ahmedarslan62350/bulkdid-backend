@@ -13,5 +13,7 @@ adminRouter.route('/update-state').post(apiController.updateState)
 adminRouter.route('/update-user').post(apiController.updateUser)
 adminRouter.route('/delete-user').post(apiController.deleteUser)
 adminRouter.route('/add-state').post(apiController.addState)
+adminRouter.route('/change-env-variable').post(apiController.changeEnvVariable)
+adminRouter.route('/get-all-env-variable').post(apiController.getAllEnvVariables)
 
 export default adminRouter

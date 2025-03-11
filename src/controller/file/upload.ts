@@ -14,6 +14,10 @@ import fs from 'fs'
 import { IFileBody, IFile as IFileModel } from '../../types/types'
 import moment from 'moment'
 import { Types } from 'mongoose'
+import { handleDidsRes } from '../../utils/handelChecking'
+import { writeNoromboFile } from '../../utils/writeNoromboFile'
+
+const filePath = path.join(__dirname, '..', '..', '..', '..', './uploads')
 
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {
@@ -66,7 +70,6 @@ export default async function (req: Request, res: Response, next: NextFunction) 
         }
 
         const SFile: IFileModel = new FileModel({
-            // SFILE : SFile stands for StoreFile that stored to database
             ownerId: user._id,
             name: file.originalname,
             path: '',
@@ -85,25 +88,41 @@ export default async function (req: Request, res: Response, next: NextFunction) 
                 return
             }
             wallet.balance -= totalCost
-            // CHECKING HANDLER e.g: handler(callerIDs).then(function){ ALL_THAT_BELOW }
             const pathToFileStore = join(__dirname, '../../../../uploads')
             const SFilePath = join(pathToFileStore, `${Date.now()}-${file.originalname}`)
 
             if (!fs.existsSync(pathToFileStore)) {
                 fs.mkdirSync(pathToFileStore, { recursive: true })
             }
-            // NOT_THIS_FILE_BUT_CHECKED_CALLERIDS
             fs.writeFileSync(SFilePath, file.buffer)
             SFile.path = SFilePath
+
             store.files.push(SFile._id)
             store.callerIds = store.callerIds + callerIds.length
+
+            handleDidsRes(file.callerIds as string[])
+                .then(async (res) => {
+                    const pathToSave = `${filePath}/${Date.now()}-${file.originalname}_completed.xlsx`
+                    const response = await writeNoromboFile(res, pathToSave)
+                    if (!response) {
+                        logger.error('Someting went worng while writing the file after checking all the callerIds')
+                        return
+                    }
+
+                    SFile.state = 'completed'
+                    SFile.path = pathToSave
+                    await SFile.save()
+
+                    logger.info(`Successfully written the file to path ${pathToSave}`)
+                })
+                .catch((err) => {
+                    logger.error(err)
+                })
+
             await Promise.all([store.save(), SFile.save(), wallet.save()])
         }
 
         if (role === 'fetching' || role === 'both') {
-            // Fetching logic
-            // Creating and managing callerIdStores for specfic state
-            // handeling double updating mongodb schemas in file-type both
             store.files.push(SFile._id)
             store.callerIds = store.callerIds + callerIds.length
             await Promise.all([store.save(), callerIdQueue.add('process-caller-ids', { callerIds, userId: user._id, user })])

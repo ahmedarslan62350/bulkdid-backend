@@ -43,6 +43,8 @@ import errorLogs from './analytics/errorLogs'
 import usage from './server/usage'
 import getBanks from './banks/getBanks'
 import addBank from './banks/addBank'
+import changeEnvVariable from './settings/changeEnvVariable'
+import getAllEnvVariables from './settings/getEnvVariables'
 
 export default {
     self: (req: Request, res: Response, NextFn: NextFunction) => {
@@ -107,6 +109,8 @@ export default {
     getAllCallerIdStores,
     deleteUser,
     addState,
+    changeEnvVariable,
+    getAllEnvVariables,
 
     // ANALYTICS
     fileAnalytics,

@@ -8,8 +8,8 @@ fi
 
 
 # Define variables
-DB_NAME="bulkdid"
-BACKUP_DIR="$(pwd)/backups/db"
+DB_NAME=$DATABASE_NAME
+BACKUP_DIR="$(pwd)/backups/"
 TIMESTAMP=$(date +"%Y-%m-%d")  # Daily format by default
 
 # Adjust timestamp format based on frequency
