@@ -8,7 +8,7 @@
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
         "skipLibCheck": true,
-        "moduleResolution": "Node",
+        "moduleResolution": "node",
         "outDir": "./dist",
         "rootDir": ".",
         "resolveJsonModule": true,
@@ -17,7 +17,7 @@
         "sourceMap": true,
         "typeRoots": ["./node_modules/@types", "./src/types"] // Add this line
     },
-    "include": ["src", "test", "script", "."],
+    "include": ["src", "test", "script"],
     "exclude": ["node_modules", "dist"],
     "files": ["src/types.d.ts"]
 }
