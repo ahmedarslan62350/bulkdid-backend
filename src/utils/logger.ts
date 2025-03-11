@@ -85,7 +85,7 @@ const fileTransport = (): Array<DailyRotateFile> => {
             level: 'info',
             format: format.combine(format.timestamp(), fileLogFormat),
             maxSize: '100k',
-            maxFiles: '5',
+            maxFiles: config.LOGS_PERCISTENT_FREQUENCY_IN_DAYS,
             extension: '.info.log',
         }),
 
@@ -94,7 +94,7 @@ const fileTransport = (): Array<DailyRotateFile> => {
             level: 'error',
             format: format.combine(format.timestamp(), fileLogFormat),
             maxSize: '100k',
-            maxFiles: '5',
+            maxFiles: config.LOGS_PERCISTENT_FREQUENCY_IN_DAYS,
             extension: '.error.log'
         })
     ]

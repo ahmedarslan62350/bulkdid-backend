@@ -36,7 +36,7 @@ void (async () => {
                     .then(() => logger.info('syncRedisToMongo solved'))
                     .catch(() => logger.error('Something went wrong in syncRedisToMongo'))
             },
-            1000 * 60 * Number(config.TIME_TO_UPDATE_DB_BY_REDIS)
+            1000 * Number(config.CACHE_TTL_IN_SECONDS)
         )
     } catch (error) {
         logger.error('APPLICATION_ERROR', error)

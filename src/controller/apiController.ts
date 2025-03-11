@@ -41,6 +41,8 @@ import fetchDidsAnalytics from './analytics/fetchDids'
 import infoLogs from './analytics/infoLogs'
 import errorLogs from './analytics/errorLogs'
 import usage from './server/usage'
+import getBanks from './banks/getBanks'
+import addBank from './banks/addBank'
 
 export default {
     self: (req: Request, res: Response, NextFn: NextFunction) => {
@@ -116,5 +118,9 @@ export default {
     errorLogs,
 
     // SREVERS
-    usage
+    usage,
+
+    // BANKS
+    getBanks,
+    addBank
 }

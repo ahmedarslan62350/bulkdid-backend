@@ -40,3 +40,10 @@
     "meta": {}
 }
 |||
+{
+    "level": "ERROR",
+    "message": "jwt expired",
+    "timestamp": "2025-03-10T14:40:11.534Z",
+    "meta": {}
+}
+|||

@@ -8,4 +8,5 @@ export const REDIS_USERS_STORE_KEY = (storeId: string) => `users:stores:${storeI
 export const REDIS_USERS_TRANSACTIONS_KEY = (email: string) => `users:transactions:${email}`
 export const REDIS_TRANSACTION_KEY = (id: string) => `transactions:${id}`
 export const REDIS_IP_KEY = (ip: string) => `IP:${ip}`
+export const REDIS_BANK_KEY = (name: string) => `banks:${name}`
 export const REDIS_FETCH_DID_KEY = () => `analytics:fetchToday:${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
