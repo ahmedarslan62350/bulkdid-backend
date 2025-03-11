@@ -22,8 +22,10 @@ export default {
 
             if (extName === '.xlsx') {
                 // Read the XLSX file from the buffer
-                const nodeBuffer = Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer)
-                const response = await excelWorkbook.xlsx.load(nodeBuffer)
+                const nodeBuffer= Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+                const response = await excelWorkbook.xlsx.load(nodeBuffer as any);
+
                 const sheets = response.worksheets[0] // Get the first sheet
 
                 const data = sheets.getColumn(1).values

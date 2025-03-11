@@ -14,5 +14,11 @@ write at last
 
 also install copfiles globly:
 npm i copyfiles -g
+
+mv router/AdminRouter.ts router/adminRouter.ts
+
+
 also install 
 npm i --save-dev @types/eslint-config-prettier
+
+
