@@ -1,54 +1,85 @@
-import { Client, LocalAuth } from 'whatsapp-web.js'
+/* eslint-disable no-console */
+import { Client, RemoteAuth } from 'whatsapp-web.js'
 import qrcode from 'qrcode-terminal'
 import logger from '../utils/logger'
+import { redis, RedisStore } from '../service/redisInstance'
 
-export default async function CreateClient() {
+const store = new RedisStore()
+export let whatsappClient: Client | null = null
+
+export async function CreateClient() {
     try {
-        const client = new Client({
-            webVersion: '2.2407.3',
-            authStrategy: new LocalAuth(),
+        if (whatsappClient) {
+            console.log('WhatsApp Client already initialized, skipping...')
+            return whatsappClient
+        }
+
+        const sessionId = `session_${Math.random().toString(36).substring(2, 15)}`
+        whatsappClient = new Client({
+            authStrategy: new RemoteAuth({
+                clientId: sessionId,
+                dataPath: './sessions',
+                backupSyncIntervalMs: 300000,
+                store
+            }),
             puppeteer: {
-                headless: true, 
-                args: ['--no-sandbox', '--disable-setuid-sandbox']
+                headless: true,
+                args: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-dev-shm-usage',
+                    '--disable-accelerated-2d-canvas',
+                    '--no-first-run',
+                    '--no-zygote',
+                    '--single-process',
+                    '--disable-gpu'
+                ]
             }
         })
-        client.on('qr', (qr) => {
+
+        await whatsappClient.initialize()
+
+        whatsappClient.on('qr', (qr) => {
             qrcode.generate(qr, { small: true })
-            // eslint-disable-next-line no-console
-            console.log('Scan the QR code to log in.', qr)
+            console.log('Scan the QR code to log in.')
+            logger.info('Scan the QR code to log in.')
         })
 
-        client.on('ready', () => {
-            logger.info('WhatsApp client is ready!')
+        whatsappClient.on('authenticated', (session) => {
+            redis
+                .set(`whatsapp:session:${sessionId}`, JSON.stringify(session))
+                .then()
+                .catch((err) => logger.error(err))
+        })
 
-            client
+        whatsappClient.on('ready', () => {
+            console.log('WhatsApp Client is ready!')
+
+            whatsappClient!
                 .getChats()
                 .then((chats) => {
-                    logger.info('Available WIDs:')
-                    chats.forEach((chat) => {
-                        logger.info(`- ${chat.id._serialized}`)
-                    })
+                    console.log('Available WIDs:')
+                    chats.forEach((chat) => console.log(`- ${chat.id._serialized}`))
                 })
-                .catch((err) => {
-                    logger.error('Failed to retrieve WIDs:', err)
-                })
+                .catch((err) => logger.error(err))
         })
 
-        client.on('auth_failure', () => {
-            logger.error('Authentication failed. Please scan the QR code again.')
+        whatsappClient.on('auth_failure', () => {
+            console.error('Authentication failed. Restarting WhatsApp client...')
         })
 
-        client.on('disconnected', () => {
-            logger.info('WhatsApp client disconnected.')
-            // Optionally, you can call client.initialize() here to reinitialize
+        whatsappClient.on('disconnected', () => {
+            redis
+                .del(`whatsapp:session:${sessionId}`)
+                .then()
+                .catch((err) => logger.error(err))
+
+            console.warn('WhatsApp client disconnected. Reconnecting...')
         })
 
-        await client.initialize()
-        return client
+        return whatsappClient
     } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(error)
-        logger.error(error)
+        console.error('WhatsApp Client Error:', error)
         return null
     }
 }

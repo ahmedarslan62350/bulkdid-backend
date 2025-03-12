@@ -1,25 +1,15 @@
-import { NextFunction, Request } from 'express'
-import httpError from './httpError'
+/* eslint-disable no-console */
 import logger from './logger'
-import { Client, MessageMedia } from 'whatsapp-web.js'
+import { MessageMedia } from 'whatsapp-web.js'
 import { IAccessTokenData } from '../types/types'
 import fs from 'fs/promises'
-import responseMessage from '../constants/responseMessage'
+import { whatsappClient } from '../config/whatsappClient'
 
-export default async function (
-    req: Request,
-    next: NextFunction,
-    image: Express.Multer.File,
-    imageFilePath: string,
-    client: Client,
-    recipient: string,
-    data: IAccessTokenData
-) {
+export default async function (image: Express.Multer.File, imageFilePath: string, recipient: string, data: IAccessTokenData) {
     try {
-        // eslint-disable-next-line no-console
-        console.log('WHATS_ACLIENT_CALLED')
-        const fileData = await fs.readFile(imageFilePath)
+        console.log('WHATS_APP_CLIENT_CALLED')
 
+        const fileData = await fs.readFile(imageFilePath)
         const base64Data = fileData.toString('base64')
         const mimeType = image.mimetype || 'image/jpeg'
 
@@ -28,31 +18,29 @@ export default async function (
         logger.info(`Sending image to ${recipient}@c.us`)
 
         const formattedMessage = `
-                        📌 *User Details* 📌
-                        ----------------------------
-                        🆔 *ID:* ${JSON.stringify(data._id)}
-                        👤 *Name:* ${data.name}
-                        📧 *Email:* ${data.email}
-                        🛠 *Role:* ${data.role}
-                        ✅ *Verified:* ${data.isVerified ? 'Yes' : 'No'}
-                        🏪 *Store ID:* ${JSON.stringify(data.store)}
-                        💰 *Wallet ID:* ${JSON.stringify(data.walletId)}
-                        ----------------------------
-                    `
+        📌 *User Details* 📌
+        ----------------------------
+        🆔 *ID:* ${JSON.stringify(data._id)}
+        👤 *Name:* ${data.name}
+        📧 *Email:* ${data.email}
+        🛠 *Role:* ${data.role}
+        ✅ *Verified:* ${data.isVerified ? 'Yes' : 'No'}
+        🏪 *Store ID:* ${JSON.stringify(data.store)}
+        💰 *Wallet ID:* ${JSON.stringify(data.walletId)}
+        ----------------------------
+        `
 
-        const response = await client.sendMessage(`${recipient}@c.us`, media, {
-            caption: `User details : 
-                      ${formattedMessage}
-                     `
-        })
-
-        logger.info(`Image sent to ${recipient}@c.us`, response)
+        if (whatsappClient) {
+            const response = await whatsappClient.sendMessage(`${recipient}@c.us`, media, {
+                caption: `User details : ${formattedMessage}`
+            })
+            logger.info(`Image sent to ${recipient}@c.us`, response)
+        }
 
         return true
     } catch (error) {
-        // eslint-disable-next-line no-console
         console.log(error)
         logger.error(error)
-        httpError(next, error, req, responseMessage.INTERNAL_SERVER_ERROR.code)
+        return false
     }
 }

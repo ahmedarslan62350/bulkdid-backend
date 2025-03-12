@@ -3,7 +3,6 @@ import httpError from '../../utils/httpError'
 import responseMessage from '../../constants/responseMessage'
 import httpResponse from '../../utils/httpResponse'
 import { IReqTransactionBody } from '../../types/types'
-import { whatsappClient } from '../../app'
 import path from 'path'
 import config from '../../config/config'
 import fs from 'fs/promises'
@@ -27,11 +26,8 @@ export default async function handleTransaction(req: Request, res: Response, nex
             await fs.writeFile(imagePath, image.buffer)
 
             await whatsappQueue.add('send-image', {
-                req,
-                next,
                 image,
                 imagePath,
-                whatsappClient,
                 recipientNumber: config.WHATSAPP_RECEPENT_NUMBER!,
                 user
             })

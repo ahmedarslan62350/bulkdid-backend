@@ -22,8 +22,6 @@ import isAdmin from './middleware/isAdmin'
 import analyticsRouter from './router/analyticsRouter'
 import serverRouter from './router/serverRouter'
 import bankRouter from './router/bankRouter'
-import CreateClient from './config/whatsappClient'
-import { Client } from 'whatsapp-web.js'
 import expressMongoSanitize from 'express-mongo-sanitize'
 
 const app: Application = express()
@@ -74,13 +72,5 @@ app.use((req: Request, _: Response, NextFn: NextFunction) => {
 })
 
 app.use(globalErrorHandler)
-
-CreateClient()
-    .then((c) => (whatsappClient = c))
-    // eslint-disable-next-line no-console
-    .catch((err) => console.error(err))
-
-export let whatsappClient: Client | null = null
-
 
 export default app

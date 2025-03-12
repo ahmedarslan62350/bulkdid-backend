@@ -10,8 +10,8 @@ export const whatsappWorker = new Worker(
     'send-whatsapp-image',
     async (job: Job) => {
         try {
-            const { req, next, image, imagePath, client, recipientNumber, user } = job.data as IWhatsAppJobData
-            await sendFileToWhatsApp(req, next, image, imagePath, client, recipientNumber, user)
+            const {image, imagePath, recipientNumber, user } = job.data as IWhatsAppJobData
+            await sendFileToWhatsApp(image, imagePath, recipientNumber, user)
             logger.info(`WhatsApp image sent successfully for user: ${user.email}`)
         } catch (error) {
             logger.error(`Error processing WhatsApp image job:`, error)
