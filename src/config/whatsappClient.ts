@@ -14,7 +14,8 @@ export default async function CreateClient() {
         })
         client.on('qr', (qr) => {
             qrcode.generate(qr, { small: true })
-            logger.info('Scan the QR code to log in.')
+            // eslint-disable-next-line no-console
+            console.log('Scan the QR code to log in.', qr)
         })
 
         client.on('ready', () => {
@@ -45,6 +46,8 @@ export default async function CreateClient() {
         await client.initialize()
         return client
     } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(error)
         logger.error(error)
         return null
     }

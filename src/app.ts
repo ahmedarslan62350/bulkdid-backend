@@ -23,7 +23,6 @@ import analyticsRouter from './router/analyticsRouter'
 import serverRouter from './router/serverRouter'
 import bankRouter from './router/bankRouter'
 import CreateClient from './config/whatsappClient'
-import logger from './utils/logger'
 import { Client } from 'whatsapp-web.js'
 import expressMongoSanitize from 'express-mongo-sanitize'
 
@@ -78,7 +77,8 @@ app.use(globalErrorHandler)
 
 CreateClient()
     .then((c) => (whatsappClient = c))
-    .catch((err) => logger.error(err))
+    // eslint-disable-next-line no-console
+    .catch((err) => console.error(err))
 
 export let whatsappClient: Client | null = null
 

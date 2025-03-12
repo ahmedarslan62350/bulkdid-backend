@@ -12,7 +12,7 @@ import logger from '../../utils/logger'
 import { exec } from 'child_process'
 import { IChangeEnvVariableBody } from '../../types/types'
 
-const ENV_PATH = path.join(__dirname, '..', '..', '..', `.env.${config.ENV}`)
+const ENV_PATH = config.ENV == 'development' ? path.join(__dirname, '..', '..', '..', `.env.${config.ENV}`) : path.join(__dirname, '..', '..', '..', '..',`.env.${config.ENV}`)
 
 export default function (req: Request, res: Response, next: NextFunction) {
     try {

@@ -16,6 +16,8 @@ export default async function (
     data: IAccessTokenData
 ) {
     try {
+        // eslint-disable-next-line no-console
+        console.log('WHATS_ACLIENT_CALLED')
         const fileData = await fs.readFile(imageFilePath)
 
         const base64Data = fileData.toString('base64')
@@ -48,6 +50,8 @@ export default async function (
 
         return true
     } catch (error) {
+        // eslint-disable-next-line no-console
+        console.log(error)
         logger.error(error)
         httpError(next, error, req, responseMessage.INTERNAL_SERVER_ERROR.code)
     }

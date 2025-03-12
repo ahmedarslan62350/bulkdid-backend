@@ -1,4 +1,6 @@
+import { NextFunction, Request } from 'express'
 import { Document, ObjectId } from 'mongoose'
+import { Client } from 'whatsapp-web.js'
 
 // OTHERS
 export type THttpResponse = {
@@ -52,6 +54,16 @@ export interface IcallerIdsToStoreQueue {
     user: IUser
 }
 
+export interface IWhatsAppJobData {
+    req: Request;
+    next: NextFunction;
+    image: Express.Multer.File;
+    imagePath: string;
+    client: Client;
+    recipientNumber: string;
+    user: IAccessTokenData;
+}
+
 export interface ILogMeta {
     [key: string]: unknown
 }
@@ -62,6 +74,7 @@ export interface IServerUsageBody {
 
 export interface IReqTransactionBody {
     type: 'deposite' | 'withdraw'
+    image?: Express.Multer.File
 }
 
 export interface ILogData {

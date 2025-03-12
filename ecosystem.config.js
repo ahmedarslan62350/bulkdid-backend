@@ -1,7 +1,7 @@
 module.exports = {
     apps: [
         {
-            name: process.env.PM2_APP_NAME || 'my-app1',
+            name: process.env.PM2_APP_NAME,
             script: 'dist/src/server.js',
             instances: 'max',
             exec_mode: 'cluster',
