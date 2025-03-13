@@ -2,7 +2,6 @@ import { syncRedisToMongo } from '../script/syncRedisToDB'
 import app from './app'
 import config from './config/config'
 import { initRateLimitter } from './config/rateLimitter'
-import { CreateClient } from './config/whatsappClient'
 import databaseService from './service/databaseService'
 import logger from './utils/logger'
 
@@ -29,10 +28,6 @@ void (async () => {
                 TIME_STAMP: new Date().toISOString()
             }
         })
-
-        CreateClient()
-            .then()
-            .catch((err) => logger.error(err))
 
         // SETUP INTERVAL FOR MOVEING DATA REDIS TO DATABASE
         setInterval(

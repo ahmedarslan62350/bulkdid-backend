@@ -6,7 +6,7 @@ import { IReqTransactionBody } from '../../types/types'
 import path from 'path'
 import config from '../../config/config'
 import fs from 'fs/promises'
-import { whatsappQueue } from '../../queues/whatsAppQueue'
+import axios from 'axios'
 
 export default async function handleTransaction(req: Request, res: Response, next: NextFunction) {
     try {
@@ -22,14 +22,14 @@ export default async function handleTransaction(req: Request, res: Response, nex
         if (image && config.WHATSAPP_SERVICE_ENABLED === 'true') {
             const basePath = config.ENV === 'development' ? '../../../uploads' : '../../../../uploads'
             const imagePath = path.join(__dirname, basePath, `${Date.now()}-${image.originalname}`)
-
+            
+            const url = `${config.WHATSAPP_SERVER_URL!}/api/v1/send-image`
             await fs.writeFile(imagePath, image.buffer)
-
-            await whatsappQueue.add('send-image', {
-                image,
+            
+            await axios.post(url, {
                 imagePath,
-                recipientNumber: config.WHATSAPP_RECEPENT_NUMBER!,
-                user
+                user,
+                recipientNumber: config.WHATSAPP_RECEPENT_NUMBER
             })
         }
 

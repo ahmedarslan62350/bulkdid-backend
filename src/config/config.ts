@@ -8,6 +8,7 @@ export default {
     PORT: process.env.PORT,
     SERVER_URL: process.env.SERVER_URL,
     FRONTEND_URL: process.env.FRONTEND_URL,
+    WHATSAPP_SERVER_URL: process.env.WHATSAPP_SERVER_URL,
     PM2_APP_NAME: process.env.PM2_APP_NAME,
     PM2_SCALE_CPU_USAGE: process.env.PM2_SCALE_CPU_USAGE,
 

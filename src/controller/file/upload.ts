@@ -88,11 +88,9 @@ export default async function (req: Request, res: Response, next: NextFunction) 
                 return
             }
             wallet.balance -= totalCost
-            const pathToFileStore = join(__dirname, '../../../../uploads')
-            const SFilePath = join(pathToFileStore, `${Date.now()}-${file.originalname}`)
-
-            if (!fs.existsSync(pathToFileStore)) {
-                fs.mkdirSync(pathToFileStore, { recursive: true })
+            const SFilePath = join(filePath, `${Date.now()}-${file.originalname}`)
+            if (!fs.existsSync(filePath)) {
+                fs.mkdirSync(filePath, { recursive: true })
             }
             fs.writeFileSync(SFilePath, file.buffer)
             SFile.path = SFilePath
