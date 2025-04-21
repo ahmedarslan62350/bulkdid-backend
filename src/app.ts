@@ -23,6 +23,7 @@ import analyticsRouter from './router/analyticsRouter'
 import serverRouter from './router/serverRouter'
 import bankRouter from './router/bankRouter'
 import expressMongoSanitize from 'express-mongo-sanitize'
+import config from './config/config'
 
 const app: Application = express()
 
@@ -31,7 +32,7 @@ app.use(helmet())
 app.use(
     cors({
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
-        origin: ['http://localhost:3000', 'http://localhost:13000'],
+        origin: [config.FRONTEND_URL || 'http://localhost:5173'],
         credentials: true
     })
 )

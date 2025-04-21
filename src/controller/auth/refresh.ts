@@ -30,8 +30,8 @@ export default async function (req: Request, res: Response, next: NextFunction) 
 
         const token = await user.generateAccessToken()
         res.cookie('token', token, {
-            sameSite: config.ENV === 'production' ? 'none' : 'lax',
-            secure: config.ENV === 'production',
+            sameSite: config.ENV === 'production' && config.IS_IN_HTTPS_MODE == 'true' ? 'none' : 'lax',
+            secure: config.ENV === 'production' && config.IS_IN_HTTPS_MODE == 'true',
             httpOnly: false
         })
 

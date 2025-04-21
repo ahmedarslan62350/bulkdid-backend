@@ -6,6 +6,7 @@ export default {
     // SERVER
     ENV: process.env.ENV,
     PORT: process.env.PORT,
+    IS_IN_HTTPS_MODE: process.env.IS_IN_HTTPS_MODE,
     SERVER_URL: process.env.SERVER_URL,
     FRONTEND_URL: process.env.FRONTEND_URL,
     WHATSAPP_SERVER_URL: process.env.WHATSAPP_SERVER_URL,

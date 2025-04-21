@@ -99,9 +99,9 @@ export default async function (req: Request, res: Response, next: NextFunction) 
         }
 
         res.cookie('email', header, {
-            sameSite: config.ENV === 'production' ? 'none' : 'lax',
-            secure: config.ENV === 'production',
-            httpOnly: config.ENV === 'development',
+            sameSite: config.ENV === 'production' && config.IS_IN_HTTPS_MODE == 'true' ? 'none' : 'lax',
+            secure: config.ENV === 'production' && config.IS_IN_HTTPS_MODE === 'true',
+            httpOnly: true,
             maxAge: 1000 * 120
         })
 
