@@ -27,6 +27,9 @@ const transactionSchema = new Schema<ITransaction>(
         },
         from: {
             type: String
+        },
+        imageUrl: {
+            type: String
         }
     },
     { timestamps: true }

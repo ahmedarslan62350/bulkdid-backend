@@ -1,5 +1,4 @@
 import { NextFunction, Response, Request } from 'express'
-import { UserModel } from '../../models/User'
 import { FileModel } from '../../models/File'
 import { callerIdQueue } from '../../queues/storeCallerIdsToDBQueue'
 import { StoreModel } from '../../models/Store'
@@ -11,11 +10,13 @@ import httpError from '../../utils/httpError'
 import httpResponse from '../../utils/httpResponse'
 import config from '../../config/config'
 import fs from 'fs'
-import { IFileBody, IFile as IFileModel } from '../../types/types'
+import { IAccessTokenData, IFile, IFileBody, IFile as IFileModel } from '../../types/types'
 import moment from 'moment'
 import { Types } from 'mongoose'
 import { handleDidsRes } from '../../utils/handelChecking'
 import { writeNoromboFile } from '../../utils/writeNoromboFile'
+import { redis } from '../../service/redisInstance'
+import { REDIS_USER_FILE_KEY } from '../../constants/redisKeys'
 
 const filePath = path.join(__dirname, '..', '..', '..', '..', './uploads')
 
@@ -30,9 +31,11 @@ export default async function (req: Request, res: Response, next: NextFunction) 
             return
         }
 
-        const user = await UserModel.findById(req.user?._id)
-        if (!user) {
-            httpResponse(req, res, responseMessage.UNAUTHORIZED.code, responseMessage.UNAUTHORIZED.message)
+        const user = req.user as IAccessTokenData
+        const redisFileKey = REDIS_USER_FILE_KEY(user.email)
+
+        if (!user.isAllowedToFetch && (role === 'both' || role === 'fetching')) {
+            httpResponse(req, res, responseMessage.FORBIDDEN.code, responseMessage.FORBIDDEN.message)
             return
         }
 
@@ -81,7 +84,7 @@ export default async function (req: Request, res: Response, next: NextFunction) 
             callerIds: [...callerIds]
         })
 
-        if (role === 'checking-status' || role === 'both') {
+        if (role === 'checking' || role === 'both') {
             const totalCost = callerIds.length * Number(config.COST_PER_CALLERID_CHECK)
             if (wallet.balance < totalCost) {
                 httpResponse(req, res, responseMessage.SERVICE_UNAVAILABLE.code, 'You have no balance available for this operation')
@@ -107,9 +110,12 @@ export default async function (req: Request, res: Response, next: NextFunction) 
                         return
                     }
 
+                    const files = await redis.lrange(redisFileKey, 0, -1)
+                    const index = files.findIndex((file) => (JSON.parse(file) as IFile)._id === SFile._id)
+
                     SFile.state = 'completed'
                     SFile.path = pathToSave
-                    await SFile.save()
+                    await Promise.all([SFile.save(), redis.lset(redisFileKey, index, JSON.stringify(SFile))])
 
                     logger.info(`Successfully written the file to path ${pathToSave}`)
                 })
@@ -126,7 +132,7 @@ export default async function (req: Request, res: Response, next: NextFunction) 
             await Promise.all([store.save(), callerIdQueue.add('process-caller-ids', { callerIds, userId: user._id, user })])
         }
 
-        await SFile.save()
+        await Promise.all([SFile.save()])
         httpResponse(req, res, responseMessage.SUCCESS.code, responseMessage.SUCCESS.message, {
             success: true,
             message: 'File successfully uploaded'

@@ -12,6 +12,8 @@ import nodeMailerHTML from '../../constants/nodemailerHTML'
 import { emailQueue } from '../../queues/emailQueue'
 import jwtVerification from '../../utils/jwtVerification'
 import { IRegisterBody } from '../../types/types'
+import { redis } from '../../service/redisInstance'
+import { REDIS_USER_KEY } from '../../constants/redisKeys'
 
 export default async function (req: Request, res: Response, next: NextFunction) {
     try {
@@ -39,6 +41,14 @@ export default async function (req: Request, res: Response, next: NextFunction) 
 
         if (password !== confirmPassword) {
             httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.VALIDATION_ERROR.PASSWORD_MISMATCH)
+            return
+        }
+
+        const redisUserKey = REDIS_USER_KEY(email)
+        const redisUser = await redis.get(redisUserKey)
+
+        if (redisUser) {
+            httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.VALIDATION_ERROR.EMAIL_ALREADY_EXISTS)
             return
         }
 
@@ -76,6 +86,7 @@ export default async function (req: Request, res: Response, next: NextFunction) 
         })
 
         newUser.verifyCode = verifyCode
+        newUser.verifyCodeExpiry = Date.now() + 1000 * 120
         newUser.store = store._id
         newUser.walletId = wallet._id
 
@@ -87,7 +98,12 @@ export default async function (req: Request, res: Response, next: NextFunction) 
             return
         }
 
-        res.cookie('email', header)
+        res.cookie('email', header, {
+            sameSite: config.ENV === 'production' ? 'none' : 'lax',
+            secure: config.ENV === 'production',
+            httpOnly: config.ENV === 'development',
+            maxAge: 1000 * 120
+        })
 
         setTimeout(
             () => {

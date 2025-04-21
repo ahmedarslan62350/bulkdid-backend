@@ -63,8 +63,11 @@ export default async function (req: Request, res: Response, next: NextFunction) 
 
         if (logoutSessions === 'all') {
             user.sessions.splice(0, user.sessions.length - 1)
-        } else {
+        } else if (logoutSessions === 'current') {
             user.sessions.splice(user.sessions.indexOf(ip) - 1, user.sessions.indexOf(ip))
+        } else {
+            httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.VALIDATION_ERROR.INVALID_ENTITY)
+            return
         }
 
         await Promise.all([
@@ -75,7 +78,7 @@ export default async function (req: Request, res: Response, next: NextFunction) 
                 html: nodemailerHTML.passwordChanged(user.name)
             })
         ])
-        
+
         res.clearCookie('token')
         httpResponse(req, res, responseMessage.SUCCESS.code, responseMessage.SUCCESS.message, {
             success: true,

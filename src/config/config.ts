@@ -53,6 +53,7 @@ export default {
     PASSWORD_POLICY: (process.env.PASSWORD_POLICY as 'basic' | 'medium' | 'strong') || 'medium',
     SESSION_TIMEOUT: process.env.SESSION_TIMEOUT,
     MAX_LOGIN_ATTEMPTS: process.env.MAX_LOGIN_ATTEMPTS,
+    MAX_LOGIN_ATTEMPTS_TIMEOUT: process.env.MAX_LOGIN_ATTEMPTS_TIMEOUT,
     MAX_WITHDRAW: process.env.MAX_WITHDRAW, // Pending
     MAX_DEPOSITS: process.env.MAX_DEPOSITS, // Pending
     MAX_FILES: process.env.MAX_FILES,

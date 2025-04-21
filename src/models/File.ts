@@ -42,8 +42,8 @@ const fileSchema = new Schema<IFile>(
         },
         role: {
             type: String,
-            enum: ['checking-status', 'fetching', 'both'],
-            default: 'checking-status'
+            enum: ['checking', 'fetching', 'both'],
+            default: 'checking'
         }
     },
     { timestamps: true }

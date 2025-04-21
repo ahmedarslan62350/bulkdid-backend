@@ -19,7 +19,7 @@ export default async function (req: Request, res: Response, next: NextFunction) 
         }
 
         if (!strBanks.length) {
-            const banks = await BankModel.find().select('-_id -__v -createdAt -updatedAt')
+            const banks = await BankModel.find().select('-__v -createdAt -updatedAt')
             if (!banks.length) {
                 httpResponse(req, res, responseMessage.NOT_FOUND.code, responseMessage.NOT_FOUND.message('banks'))
                 return

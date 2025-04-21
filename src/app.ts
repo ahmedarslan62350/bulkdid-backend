@@ -31,13 +31,14 @@ app.use(helmet())
 app.use(
     cors({
         methods: ['GET', 'POST', 'PUT', 'DELETE'],
-        origin: ['http://localhost:5173'],
+        origin: ['http://localhost:3000', 'http://localhost:13000'],
         credentials: true
     })
 )
+
+app.use(cookieParser())
 app.use(express.json())
 app.use(express.static(join(__dirname, '../', './public')))
-app.use(cookieParser())
 app.use(urlencoded({ extended: true }))
 app.use(expressMongoSanitize())
 
@@ -54,7 +55,7 @@ app.use('/api/v1/profile', rateLimit, isAuthenticated, profileRouter)
 app.use('/api/v1/admin', rateLimit, isAuthenticated, isAdmin, adminRouter)
 app.use('/api/v1/analytics', rateLimit, isAuthenticated, isAdmin, analyticsRouter)
 app.use('/api/v1/server', rateLimit, isAuthenticated, isAdmin, serverRouter)
-app.use('/api/v1/bank', rateLimit, isAuthenticated, bankRouter)
+app.use('/api/v1/bank', rateLimit, bankRouter)
 app.use('/api/v1/callerId', callerIdRouter)
 
 app.post('/api/v1/db/populate', rateLimit, async (req, res) => {

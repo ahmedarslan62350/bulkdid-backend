@@ -34,6 +34,7 @@ const userSchema = new Schema<IUser>(
         refreshToken: {
             type: String
         },
+        isAllowedToFetch: { type: Boolean, default: false },
         sessions: [{ type: String }],
         store: {
             type: mongoose.Schema.Types.ObjectId,
@@ -58,6 +59,10 @@ const userSchema = new Schema<IUser>(
         loginAttempts: {
             type: Number,
             default: 0
+        },
+        isBlocked: {
+            type: Boolean,
+            default: false
         }
     },
     { timestamps: true }
@@ -94,7 +99,7 @@ userSchema.methods.comparePassword = async function (candidatePassword: string):
     }
 }
 
-userSchema.methods.generateRefreshToken = async function (): Promise<boolean> {
+userSchema.methods.generateRefreshToken = async function (): Promise<string | boolean> {
     try {
         const user = this as IUser
         const payload = {
@@ -108,7 +113,7 @@ userSchema.methods.generateRefreshToken = async function (): Promise<boolean> {
         user.refreshToken = await jwt.sign(payload, config.JWT_TOKEN_SECRET as string, options)
 
         await user.save()
-        return true
+        return user.refreshToken
     } catch (error) {
         logger.error('Error generating Refresh Token', { error })
         return false
@@ -126,18 +131,21 @@ userSchema.methods.generateAccessToken = async function (): Promise<string | nul
             role: user.role,
             walletId: user.walletId,
             store: user.store,
+            isAllowedToFetch: user.isAllowedToFetch,
             isVerified: user.isVerified,
             sessions: user.sessions,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt
         }
+
         const options: SignOptions = {
-            expiresIn: (config.SESSION_TIMEOUT as SignOptions['expiresIn']) || '15m'
+            expiresIn: (config.SESSION_TIMEOUT as SignOptions['expiresIn']) || `10m`
         }
 
         // eslint-disable-next-line
         const token = (await jwt.sign(payload, config.JWT_TOKEN_SECRET as string, options)) as string
 
+        user.accessToken = token
         return token
     } catch (error) {
         logger.error('Error generating Access Token', { error })

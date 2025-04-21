@@ -36,8 +36,34 @@ export default async function (req: Request, res: Response, next: NextFunction) 
             return
         }
 
+        if (user.isBlocked) {
+            httpResponse(req, res, responseMessage.FORBIDDEN.code, responseMessage.FORBIDDEN.message)
+            return
+        }
+
         if (user.loginAttempts >= Number(config.MAX_LOGIN_ATTEMPTS)) {
-            httpResponse(req, res, responseMessage.SERVICE_UNAVAILABLE.code, responseMessage.SERVICE_UNAVAILABLE.message)
+            const isSetTimeOutExixts = await redis.get(`MAX_LOGIN_ATTEMPTS:userIds:${user.email}`)
+            if (!isSetTimeOutExixts) {
+                setTimeout(
+                    () => {
+                        UserModel.findById(user._id)
+                            .then(async (user) => {
+                                if (!user) return
+                                user.loginAttempts = 0
+                                await user.save()
+                            })
+                            .catch((err) => {
+                                logger.error(err)
+                            })
+                    },
+                    1000 * Number(config.MAX_LOGIN_ATTEMPTS_TIMEOUT as string)
+                )
+
+                await redis.set(`MAX_LOGIN_ATTEMPTS:userIds:${user.email}`, '', 'EX', Number(config.MAX_LOGIN_ATTEMPTS))
+            }
+
+            httpResponse(req, res, responseMessage.FORBIDDEN.code, responseMessage.FORBIDDEN.message)
+            return
         }
 
         const isPasswordMatch = await user.comparePassword(password)
@@ -58,14 +84,27 @@ export default async function (req: Request, res: Response, next: NextFunction) 
 
         const ip = req?.ip ? req.ip : '127.0.0.1'
 
-        res.cookie('token', accessToken)
+        res.cookie('token', accessToken, {
+            sameSite: config.ENV === 'production' ? 'none' : 'lax',
+            secure: config.ENV === 'production',
+            httpOnly: false
+        })
+        res.cookie('refreshToken', refreshToken, {
+            sameSite: config.ENV === 'production' ? 'none' : 'lax',
+            secure: config.ENV === 'production',
+            httpOnly: true
+        })
+
         user.loginAttempts = 0
-        user.sessions.push(ip)
+        if (!user.sessions.includes(ip)) {
+            user.sessions.push(ip)
+        }
 
         await Promise.all([user.save(), redis.set(REDIS_USER_KEY(user.email), JSON.stringify(user))])
         httpResponse(req, res, responseMessage.SUCCESS.code, responseMessage.SUCCESS.message, {
             success: true,
-            message: 'User logined successfully'
+            message: 'User logined successfully',
+            user
         })
     } catch (error) {
         logger.error(responseMessage.UNPROCESSABLE_ENTITY.message, { error })

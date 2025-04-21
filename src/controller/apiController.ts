@@ -46,6 +46,11 @@ import addBank from './banks/addBank'
 import changeEnvVariable from './settings/changeEnvVariable'
 import getAllEnvVariables from './settings/getEnvVariables'
 import reqTransaction from './wallet/reqTransaction'
+import getMyFiles from './profile/getMyFiles'
+import getWallet from './wallet/getWallet'
+import getUserStore from './admin/getStoreByUserId'
+import refresh from './auth/refresh'
+import blockUser from './admin/blockUser'
 
 export default {
     self: (req: Request, res: Response, NextFn: NextFunction) => {
@@ -76,6 +81,7 @@ export default {
     logout,
     _delete,
     updatePassword,
+    refresh,
 
     // FILE & CALLERIDS
     uploadFile: upload,
@@ -89,6 +95,7 @@ export default {
     deposite,
     getAllTransactions,
     reqTransaction,
+    getWallet,
 
     // USER_STORE
     details,
@@ -99,6 +106,7 @@ export default {
     getProfile,
     getIpDetails,
     updateProfile,
+    getMyFiles,
 
     // ADMIN
     getAllUsers,
@@ -110,9 +118,11 @@ export default {
     getAllFiles,
     getAllCallerIdStores,
     deleteUser,
+    blockUser,
     addState,
     changeEnvVariable,
     getAllEnvVariables,
+    getUserStore,
 
     // ANALYTICS
     fileAnalytics,

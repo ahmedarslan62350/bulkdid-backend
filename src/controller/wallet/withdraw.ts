@@ -10,7 +10,7 @@ import { TransactionModel } from '../../models/Transaction'
 import { redis } from '../../service/redisInstance'
 import { UserModel } from '../../models/User'
 import { IDepositeAndWithdrawBody, IUser, IWallet } from '../../types/types'
-import { REDIS_USER_KEY, REDIS_WALLET_KEY } from '../../constants/redisKeys'
+import { REDIS_USER_KEY, REDIS_USERS_TRANSACTIONS_KEY, REDIS_WALLET_KEY } from '../../constants/redisKeys'
 import config from '../../config/config'
 
 export default async function (req: Request, res: Response, next: NextFunction) {
@@ -23,7 +23,10 @@ export default async function (req: Request, res: Response, next: NextFunction) 
 
         const redisWalletKey = REDIS_WALLET_KEY(email)
         const redisUserKey = REDIS_USER_KEY(email)
+
+        const redisTranactionKey = REDIS_USERS_TRANSACTIONS_KEY(email)
         let redisWallet = await redis.get(redisWalletKey)
+
         if (!redisWallet) {
             let strRedisUser = await redis.get(redisUserKey)
             if (!strRedisUser) {
@@ -62,7 +65,7 @@ export default async function (req: Request, res: Response, next: NextFunction) 
         wallet.withdraws++
         wallet.transactions.push(transaction._id)
 
-        await Promise.all([transaction.save(), redis.set(redisWalletKey, JSON.stringify(wallet))])
+        await Promise.all([transaction.save(), redis.set(redisWalletKey, JSON.stringify(wallet)) , redis.lpush(redisTranactionKey,JSON.stringify(transaction))])
         httpResponse(req, res, responseMessage.SUCCESS.code, responseMessage.SUCCESS.message)
     } catch (error) {
         httpError(next, error, req, responseMessage.INTERNAL_SERVER_ERROR.code)

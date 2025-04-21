@@ -1,9 +1,11 @@
-import { REDIS_CALLERID_KEY, REDIS_USERS_STORE_KEY, REDIS_WALLET_KEY } from '../src/constants/redisKeys'
+import { REDIS_CALLERID_KEY, REDIS_USER_FILE_KEY, REDIS_USER_KEY, REDIS_USERS_STORE_KEY, REDIS_WALLET_KEY } from '../src/constants/redisKeys'
 import { CallerIdStoreModel } from '../src/models/CallerIdStore'
+import { FileModel } from '../src/models/File'
 import { StoreModel } from '../src/models/Store'
+import { UserModel } from '../src/models/User'
 import { WalletModel } from '../src/models/Wallet'
 import { redis } from '../src/service/redisInstance'
-import { ICallerIdStore, IStore, IWallet } from '../src/types/types'
+import { ICallerIdStore, IFile, IStore, IUser, IWallet } from '../src/types/types'
 import logger from '../src/utils/logger'
 
 export const syncRedisToMongo = async () => {
@@ -11,11 +13,18 @@ export const syncRedisToMongo = async () => {
         const walletKeys = await redis.keys(REDIS_WALLET_KEY('*'))
         const walletBulkOps = []
 
+        const allKeys = await redis.keys(REDIS_USER_KEY('*'))
+        const userKeys = allKeys.filter((key) => (key.match(/:/g) || []).length === 1)
+        const userBulkOps = []
+
         const callerIdStoreKeys = await redis.keys(REDIS_CALLERID_KEY('*'))
         const callerIdStoreBulkOps = []
 
         const storeKeys = await redis.keys(REDIS_USERS_STORE_KEY('*'))
         const storeBulkOps = []
+
+        const fileKeys = await redis.keys(REDIS_USER_FILE_KEY('*'))
+        const fileBulkOps = []
 
         for (const key of walletKeys) {
             const walletString = await redis.get(key)
@@ -33,6 +42,20 @@ export const syncRedisToMongo = async () => {
             await redis.del(key)
         }
 
+        for (const key of userKeys) {
+            const userString = await redis.get(key)
+            if (!userString) continue
+
+            const userObj = JSON.parse(userString) as IUser
+            userBulkOps.push({
+                updateOne: {
+                    filter: { _id: userObj._id },
+                    update: { $set: userObj }
+                }
+            })
+            await redis.del(key)
+        }
+
         for (const key of callerIdStoreKeys) {
             const redisCallerIdStores = await redis.lrange(key, 0, -1)
 
@@ -45,6 +68,26 @@ export const syncRedisToMongo = async () => {
                     updateOne: {
                         filter: { _id: callerIdStore._id },
                         update: { $set: callerIdStore },
+                        upsert: true
+                    }
+                })
+            }
+
+            await redis.del(key)
+        }
+
+        for (const key of fileKeys) {
+            const redisfiles = await redis.lrange(key, 0, -1)
+
+            if (!redisfiles.length) continue
+
+            for (const strFile of redisfiles) {
+                const file = JSON.parse(strFile) as IFile
+
+                fileBulkOps.push({
+                    updateOne: {
+                        filter: { _id: file._id },
+                        update: { $set: file },
                         upsert: true
                     }
                 })
@@ -69,11 +112,30 @@ export const syncRedisToMongo = async () => {
             await redis.del(key)
         }
 
-        if (walletBulkOps.length > 0 || callerIdStoreBulkOps.length > 0 || storeBulkOps.length > 0) {
+        // Erasing all the data within the users:*
+        const keys = await redis.keys('users:*')
+        if (keys.length > 0) {
+            await redis.del(...keys)
+            logger.info(`Deleted ${keys.length} keys`)
+        } else {
+            logger.info('No keys found.')
+        }
+
+        //Writing data to database
+
+        if (
+            walletBulkOps.length > 0 ||
+            callerIdStoreBulkOps.length > 0 ||
+            storeBulkOps.length > 0 ||
+            fileBulkOps.length > 0 ||
+            userBulkOps.length > 0
+        ) {
             await Promise.all([
                 WalletModel.bulkWrite(walletBulkOps),
                 CallerIdStoreModel.bulkWrite(callerIdStoreBulkOps),
-                StoreModel.bulkWrite(storeBulkOps)
+                FileModel.bulkWrite(fileBulkOps),
+                StoreModel.bulkWrite(storeBulkOps),
+                UserModel.bulkWrite(userBulkOps)
             ])
 
             logger.info(`✅ Synced redis data to MongoDB`)

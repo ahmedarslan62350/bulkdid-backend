@@ -55,13 +55,13 @@ export interface IcallerIdsToStoreQueue {
 }
 
 export interface IWhatsAppJobData {
-    req: Request;
-    next: NextFunction;
-    image: Express.Multer.File;
-    imagePath: string;
-    client: Client;
-    recipientNumber: string;
-    user: IAccessTokenData;
+    req: Request
+    next: NextFunction
+    image: Express.Multer.File
+    imagePath: string
+    client: Client
+    recipientNumber: string
+    user: IAccessTokenData
 }
 
 export interface ILogMeta {
@@ -75,6 +75,8 @@ export interface IServerUsageBody {
 export interface IReqTransactionBody {
     type: 'deposite' | 'withdraw'
     image?: Express.Multer.File
+    amount?: string
+    accountNumber?: string
 }
 
 export interface ILogData {
@@ -152,7 +154,7 @@ export interface IFile extends Document {
     totalCallerIds: number
     callerIds: number[]
     type: 'xlsx' | 'csv' | '.csv' | '.xlsx'
-    role: 'checking-status' | 'fetching' | 'both'
+    role: 'checking' | 'fetching' | 'both'
     downloads: number
     createdAt?: Date
     updatedAt?: Date
@@ -175,6 +177,7 @@ export interface ITransaction extends Document {
     type: 'deposit' | 'withdraw'
     to: string
     from: string
+    imageUrl?: string
     createdAt?: Date
     updatedAt?: Date
 }
@@ -204,13 +207,16 @@ export interface IUser extends Document {
     verifyCodeExpiry: Date | number | null
     verifyCodeUsed: number
     isVerified: boolean
+    isAllowedToFetch: boolean
     createdAt?: Date
     updatedAt?: Date
     sessions: string[]
     refreshToken: string
+    accessToken: string
     loginAttempts: number
+    isBlocked: boolean
     comparePassword(candidatePassword: string): Promise<boolean>
-    generateRefreshToken(): Promise<boolean>
+    generateRefreshToken(): Promise<boolean | string>
     generateAccessToken(): Promise<string | null>
 }
 
@@ -243,6 +249,7 @@ export interface IAccessTokenData {
     walletId: ObjectId
     store: ObjectId
     isVerified: boolean
+    isAllowedToFetch: boolean
     sessions: string[]
     createdAt?: Date
     updatedAt?: Date
@@ -291,14 +298,13 @@ export interface IGetIpDetailsBody {
 }
 
 export interface IDeleteUserBody {
-    userId: string
+    user: IUser
 }
 
 export interface IUpdateUserBody {
-    name: string
-    email: string
-    sessions: []
-    isVerified: boolean
+    user: IUser
+    wallet: IWallet
+    store: IStore
 }
 
 export interface IUpdateTransactionBody {
@@ -338,4 +344,8 @@ export interface IUpdateStoreBody {
 export interface IGetLengthByIndex {
     index?: number
     length?: number
+}
+
+export interface IBlockUserBody {
+    user: IUser
 }

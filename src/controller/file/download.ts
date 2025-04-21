@@ -4,8 +4,7 @@ import responseMessage from '../../constants/responseMessage'
 import httpResponse from '../../utils/httpResponse'
 import { FileModel } from '../../models/File'
 import { IDownloadBody } from '../../types/types'
-
-
+import { createReadStream } from 'fs'
 
 export default async function downloadFile(req: Request, res: Response, next: NextFunction) {
     try {
@@ -32,11 +31,11 @@ export default async function downloadFile(req: Request, res: Response, next: Ne
             return
         }
 
-        res.download(file.path, file.name, (err) => {
-            if (err) {
-                httpResponse(req, res, responseMessage.INTERNAL_SERVER_ERROR.code, responseMessage.INTERNAL_SERVER_ERROR.message)
-            }
-        })
+        res.setHeader('Content-Disposition', `attachment; filename="${file.name}"`)
+        res.setHeader('Content-Type', file.type)
+
+        const fileStream = createReadStream(file.path)
+        fileStream.pipe(res)
     } catch (error) {
         httpError(next, error, req, responseMessage.INTERNAL_SERVER_ERROR.code)
     }

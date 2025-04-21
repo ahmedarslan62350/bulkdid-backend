@@ -4,12 +4,16 @@ import responseMessage from '../../constants/responseMessage'
 import httpResponse from '../../utils/httpResponse'
 import { IGetLengthByIndex } from '../../types/types'
 import { WalletModel } from '../../models/Wallet'
+import { TransactionModel } from '../../models/Transaction'
 
 export default async function getAllWallets(req: Request, res: Response, next: NextFunction) {
     try {
         const { index = 0, length = 10 } = req.body as IGetLengthByIndex
 
-        const wallets = await WalletModel.find()
+        const wallets = await WalletModel.find().populate({
+            path: 'transactions',
+            model: TransactionModel
+        })
         const paginatedWallets = wallets.slice(index * length, index * length + length)
 
         httpResponse(req, res, responseMessage.SUCCESS.code, responseMessage.SUCCESS.message, { wallets: [...paginatedWallets] })

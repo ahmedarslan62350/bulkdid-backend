@@ -36,8 +36,8 @@ export default async function (req: Request, res: Response, next: NextFunction) 
             accountHolderName,
             accountNumber,
             icon,
-            iconHeight,
-            iconWidth
+            iconHeight: typeof iconHeight === 'string' ? Number(iconHeight) : iconHeight,
+            iconWidth: typeof iconWidth === 'string' ? Number(iconWidth) : iconWidth
         })
 
         await Promise.all([
