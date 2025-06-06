@@ -3,6 +3,7 @@ import logger from '../utils/logger'
 import transporter from '../service/nodeMailer'
 import { redisConnection } from '../config/redis'
 import { IEmailJob } from '../types/types'
+import config from '../config/config'
 
 export const emailQueue = new Queue('send-email', { connection: redisConnection })
 
@@ -20,7 +21,7 @@ export const emailWorker = new Worker(
 
         try {
             await transporter.sendMail({
-                from: `no-reply`,
+                from: `no-reply<${config.MAILER_USER}>`,
                 to: email,
                 subject: subject,
                 html: html

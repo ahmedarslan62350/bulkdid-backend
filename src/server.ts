@@ -5,7 +5,7 @@ import { initRateLimitter } from './config/rateLimitter'
 import databaseService from './service/databaseService'
 import logger from './utils/logger'
 
-const server = app.listen(config.PORT)
+const server = app.listen(config.PORT, () => logger.info(`Server started on port: ${config.PORT}`))
 void (async () => {
     try {
         // DATABASE_CONNECTION
