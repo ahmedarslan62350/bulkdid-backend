@@ -44,7 +44,6 @@ app.use(urlencoded({ extended: true }))
 app.use(expressMongoSanitize())
 
 // ROUTES
-app.use('/api/v1', rateLimit, router)
 app.post('/api/v1/db', rateLimit, async () => {
     await populateStates()
 })
@@ -58,6 +57,7 @@ app.use('/api/v1/analytics', rateLimit, isAuthenticated, isAdmin, analyticsRoute
 app.use('/api/v1/server', rateLimit, isAuthenticated, isAdmin, serverRouter)
 app.use('/api/v1/bank', rateLimit, bankRouter)
 app.use('/api/v1/callerId', callerIdRouter)
+app.use('/api/v1', rateLimit, router)
 
 app.post('/api/v1/db/populate', rateLimit, async (req, res) => {
     await populateStates()

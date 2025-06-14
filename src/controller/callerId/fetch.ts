@@ -12,143 +12,95 @@ import config from '../../config/config'
 import { UserModel } from '../../models/User'
 import { StoreModel } from '../../models/Store'
 import { ICallerIdStore, IStore, IUser, IWallet } from '../../types/types'
-import { REDIS_CALLERID_KEY, REDIS_FETCH_DID_KEY, REDIS_USERS_BY_STORE_KEY, REDIS_USERS_STORE_KEY, REDIS_WALLET_KEY } from '../../constants/redisKeys'
+// import { REDIS_CALLERID_KEY, REDIS_FETCH_DID_KEY, REDIS_USERS_BY_STORE_KEY, REDIS_USERS_STORE_KEY, REDIS_WALLET_KEY } from '../../constants/redisKeys'
 
 export default async function fetchCalllerId(req: Request, res: Response, next: NextFunction) {
     try {
+        // 1. Validate
         const { id, storeId } = req.params
-        if (!id || !storeId) {
-            httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.VALIDATION_ERROR.LESS_DATA)
-            return
+        if (!id || !storeId) return httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.BAD_REQUEST.message)
+
+        // 2. Get store from cache or DB
+        const redisStoreKey = `store:${storeId}`
+        let store = await redis.get(redisStoreKey)
+        if (!store) {
+            store = JSON.stringify(await StoreModel.findById(storeId))
+            await redis.set(redisStoreKey, JSON.stringify(store))
         }
 
-        const usersByStoreIdKey = REDIS_USERS_BY_STORE_KEY(storeId)
-        const userStoreKey = REDIS_USERS_STORE_KEY(storeId)
+        const parsedStore = JSON.parse(store) as IStore
 
-        const redisFetchDidKey = REDIS_FETCH_DID_KEY()
-
-        let strStore = await redis.get(userStoreKey)
-        let redisStore = JSON.parse(strStore! || '{}') as IStore
-
-        const strUser = await redis.get(usersByStoreIdKey)
-        let user: IUser | null = JSON.parse(strUser as string) as IUser
-
+        // 3. Get user from cache or DB
+        const userKey = `user:${storeId}`
+        let user = await redis.get(userKey)
         if (!user) {
-            if (!strStore) {
-                strStore = JSON.stringify(await StoreModel.findById(storeId))
-                await redis.set(userStoreKey, strStore)
-                redisStore = JSON.parse(strStore) as IStore
-            }
-
-            const store = JSON.parse(strStore) as IStore
-            redisStore = store
-            user = await UserModel.findById(store.ownerId)
-
-            if (!user) {
-                httpResponse(req, res, responseMessage.NOT_FOUND.code, responseMessage.NOT_FOUND.message('store owner'))
-                return
-            }
-            await redis.set(usersByStoreIdKey, JSON.stringify(user))
+            user = await UserModel.findById(parsedStore.ownerId)
+            if (!user) return httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.BAD_REQUEST.message)
+            await redis.set(userKey, JSON.stringify(user))
         }
 
-        const redisKey = REDIS_CALLERID_KEY(user.email)
-        const redisUserWallet = REDIS_WALLET_KEY(user.email)
+        const parsedUser = JSON.parse(user) as IUser
 
+        // 4. Prepare keys
+        const email = parsedUser.email
+        const redisCallerKey = `callerStore:${email}`
+        const redisIndexKey = `callerIndex:${email}`
+        const redisWalletKey = `wallet:${email}`
         const stateCode = quicker.extractStatusCode(id)
-        const redisCallerIdStores = await redis.lrange(redisKey, 0, -1)
 
-        if (!redisCallerIdStores.length) {
-            const wallet = await WalletModel.findById(user.walletId)
-            if (!wallet) {
-                httpResponse(req, res, responseMessage.NOT_FOUND.code, responseMessage.NOT_FOUND.message('user wallet'))
-                return
-            }
-            if (wallet.balance < Number(config.COST_PER_CALLERID_FETCH)) {
-                httpResponse(req, res, responseMessage.SERVICE_UNAVAILABLE.code, 'No much sufficient balance available')
-                return
-            }
-            wallet.balance -= Number(config.COST_PER_CALLERID_FETCH)
-            const callerIdStores = await CallerIdStoreModel.find({ ownerId: user._id })
-            if (!callerIdStores.length) {
-                httpResponse(req, res, responseMessage.NOT_FOUND.code, responseMessage.NOT_FOUND.message('callerId store'))
-                return
-            }
-            const strCallerIdStores = callerIdStores.map((e) => JSON.stringify(e))
-            const callerIdStore = callerIdStores.find((e) => e.statusCodes.includes(stateCode))!
+        // 5. Get callerIdStore
+        const callerIdStr = await redis.hget(redisCallerKey, String(stateCode))
+        let callerIdStore: ICallerIdStore
 
-            await Promise.all([redis.rpush(redisKey, ...strCallerIdStores), redis.set(redisUserWallet, JSON.stringify(wallet))])
+        if (!callerIdStr) {
+            const freshStores = await CallerIdStoreModel.find({ ownerId: parsedUser._id })
+            const match = freshStores.find((s) => s.statusCodes.includes(stateCode))
+            if (!match) return httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.BAD_REQUEST.message)
 
-            let callerIdToSend
-            if (callerIdStore.index <= callerIdStore.callerIds.length - 1) {
-                callerIdToSend = callerIdStore.callerIds[callerIdStore.index]
-                callerIdStore.index++
-            } else {
-                callerIdToSend = callerIdStore.callerIds[0]
-                callerIdStore.index = 1
-            }
+            // Save all stores to Redis hash
+            await Promise.all(
+                freshStores.map(
+                    (store) => redis.hset(redisCallerKey, store.statusCodes[0], JSON.stringify(store)) // Simplify as needed
+                )
+            )
 
-            callerIdStore.fetchRequests++
-            await Promise.all([callerIdStore.save(), wallet.save()])
-
-            httpResponse(req, res, responseMessage.SUCCESS.code, callerIdToSend, null, 'custom')
-            return
-        }
-        const callerIdStores = redisCallerIdStores.map((e) => JSON.parse(e) as ICallerIdStore)
-        const callerIdStore = callerIdStores.find((e) => e.statusCodes.includes(stateCode))!
-        const index = callerIdStores.findIndex((store) => store._id === callerIdStore._id)
-
-        let callerIdToSend
-
-        if (callerIdStore.index <= callerIdStore.callerIds.length - 1) {
-            callerIdToSend = callerIdStore.callerIds[callerIdStore.index]
-            callerIdStore.index++
+            callerIdStore = match
         } else {
-            callerIdToSend = callerIdStore.callerIds[0]
-            callerIdStore.index = 1
+            callerIdStore = JSON.parse(callerIdStr) as ICallerIdStore
         }
 
+        // 6. Get and update index
+        let index = Number(await redis.hget(redisIndexKey, String(stateCode))) || 0
+
+        const callerIdToSend = callerIdStore.callerIds[index]
+        index = (index + 1) % callerIdStore.callerIds.length
         callerIdStore.fetchRequests++
-        if (Object.keys(redisStore).length !== 0) {
-            redisStore.fetchRequests++
+
+        // 7. Get wallet
+        const walletStr = await redis.get(redisWalletKey)
+        let wallet
+
+        if (!walletStr) {
+            wallet = await WalletModel.findById(parsedUser.walletId)
+            if (!wallet) return httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.BAD_REQUEST.message)
+            await redis.set(redisWalletKey, JSON.stringify(wallet))
+        } else {
+            wallet = JSON.parse(walletStr) as IWallet
         }
-        const strWallet = await redis.get(redisUserWallet)
-        let wallet: IWallet
-
-        if (!strWallet) {
-            const walletFromDB = await WalletModel.findById(user.walletId)
-            if (!walletFromDB) {
-                httpResponse(req, res, responseMessage.NOT_FOUND.code, responseMessage.NOT_FOUND.message('user wallet'))
-                return
-            }
-            wallet = walletFromDB
-
-            await Promise.all([redis.set(redisUserWallet, JSON.stringify(walletFromDB))])
-        }
-
-        wallet = JSON.parse(strWallet!) as IWallet
 
         if (wallet.balance < Number(config.COST_PER_CALLERID_FETCH)) {
-            httpResponse(req, res, responseMessage.NOT_FOUND.code, responseMessage.NOT_FOUND.message('balance in wallet'))
-            return
+            return httpResponse(req, res, 503, 'Insufficient balance')
         }
-
         wallet.balance -= Number(config.COST_PER_CALLERID_FETCH)
 
-        if (index !== -1) {
-            await Promise.all([
-                redis.lset(redisKey, index, JSON.stringify(callerIdStore)),
-                redis.set(redisUserWallet, JSON.stringify(wallet)),
-                redis.set(userStoreKey, JSON.stringify(redisStore)),
-                redis.rpush(redisFetchDidKey, JSON.stringify({ ip: req.ip, timeStamp: Date.now() }))
-            ])
-        } else {
-            await Promise.all([
-                redis.rpush(redisKey, JSON.stringify(callerIdStore)),
-                redis.set(redisUserWallet, JSON.stringify(wallet)),
-                redis.set(userStoreKey, JSON.stringify(redisStore)),
-                redis.rpush(redisFetchDidKey, JSON.stringify({ ip: req.ip, timeStamp: Date.now() }))
-            ]) // If not found, add it
-        }
+        // 9. Save updates in parallel
+        await Promise.all([
+            redis.hset(redisCallerKey, stateCode, JSON.stringify(callerIdStore)),
+            redis.hset(redisIndexKey, stateCode, index.toString()),
+            redis.set(redisWalletKey, JSON.stringify(wallet)),
+            redis.set(redisStoreKey, JSON.stringify(parsedStore)),
+            redis.rpush(`fetchLog:${email}`, JSON.stringify({ ip: req.ip, time: Date.now() }))
+        ])
 
         httpResponse(req, res, responseMessage.SUCCESS.code, callerIdToSend, null, 'custom')
     } catch (error) {
