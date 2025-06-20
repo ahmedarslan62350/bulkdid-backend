@@ -40,7 +40,6 @@ export const fileProcessingWorker = new Worker(
             logger.info(`Successfully written file to path ${pathToSave}`)
         } catch (error) {
             logger.error('Failed to process file in worker', { error })
-            throw error
         }
     },
     { connection: redisConnection }
