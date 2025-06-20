@@ -10,13 +10,12 @@ import httpError from '../../utils/httpError'
 import httpResponse from '../../utils/httpResponse'
 import config from '../../config/config'
 import fs from 'fs'
-import { IAccessTokenData, IFile, IFileBody, IFile as IFileModel } from '../../types/types'
+import { IAccessTokenData, IFileBody, IFile as IFileModel } from '../../types/types'
 import moment from 'moment'
 import { Types } from 'mongoose'
-import { handleDidsRes } from '../../utils/handelChecking'
-import { writeNoromboFile } from '../../utils/writeNoromboFile'
-import { redis } from '../../service/redisInstance'
 import { REDIS_USER_FILE_KEY } from '../../constants/redisKeys'
+import { fileProcessingQueue } from '../../queues/fileProcessingQueue'
+import { redis } from '../../service/redisInstance'
 
 const filePath = path.join(__dirname, '..', '..', '..', '..', './uploads')
 
@@ -86,44 +85,35 @@ export default async function (req: Request, res: Response, next: NextFunction) 
 
         if (role === 'checking' || role === 'both') {
             const totalCost = callerIds.length * Number(config.COST_PER_CALLERID_CHECK)
+
             if (wallet.balance < totalCost) {
                 httpResponse(req, res, responseMessage.SERVICE_UNAVAILABLE.code, 'You have no balance available for this operation')
                 return
             }
+
             wallet.balance -= totalCost
             const SFilePath = join(filePath, `${Date.now()}-${file.originalname}`)
+
             if (!fs.existsSync(filePath)) {
                 fs.mkdirSync(filePath, { recursive: true })
             }
+
             fs.writeFileSync(SFilePath, file.buffer)
             SFile.path = SFilePath
 
             store.files.push(SFile._id)
             store.callerIds = store.callerIds + callerIds.length
 
-            handleDidsRes(file.callerIds as string[])
-                .then(async (res) => {
-                    const pathToSave = `${filePath}/${Date.now()}-${file.originalname}_completed.xlsx`
-                    const response = await writeNoromboFile(res, pathToSave)
-                    if (!response) {
-                        logger.error('Someting went worng while writing the file after checking all the callerIds')
-                        return
-                    }
-
-                    const files = await redis.lrange(redisFileKey, 0, -1)
-                    const index = files.findIndex((file) => (JSON.parse(file) as IFile)._id === SFile._id)
-
-                    SFile.state = 'completed'
-                    SFile.path = pathToSave
-                    await Promise.all([SFile.save(), redis.lset(redisFileKey, index, JSON.stringify(SFile))])
-
-                    logger.info(`Successfully written the file to path ${pathToSave}`)
-                })
-                .catch((err) => {
-                    logger.error(err)
-                })
-
             await Promise.all([store.save(), SFile.save(), wallet.save()])
+
+            await fileProcessingQueue.add('process-file-job', {
+                callerIds,
+                filePath: SFilePath,
+                redisFileKey,
+                SFileId: SFile._id,
+                fileOriginalname: file.originalname
+            })
+
         }
 
         if (role === 'fetching' || role === 'both') {
@@ -132,7 +122,7 @@ export default async function (req: Request, res: Response, next: NextFunction) 
             await Promise.all([store.save(), callerIdQueue.add('process-caller-ids', { callerIds, userId: user._id, user })])
         }
 
-        await Promise.all([SFile.save()])
+        await Promise.all([SFile.save(), redis.lpush(redisFileKey, JSON.stringify(SFile))])
         httpResponse(req, res, responseMessage.SUCCESS.code, responseMessage.SUCCESS.message, {
             success: true,
             message: 'File successfully uploaded'

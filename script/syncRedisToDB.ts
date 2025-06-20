@@ -8,8 +8,21 @@ import { redis } from '../src/service/redisInstance'
 import { ICallerIdStore, IFile, IStore, IUser, IWallet } from '../src/types/types'
 import logger from '../src/utils/logger'
 
+async function deleteKeysByPattern(pattern: string) {
+    let cursor = '0'
+    do {
+        const [newCursor, keys] = await redis.scan(cursor, 'MATCH', pattern, 'COUNT', 100)
+        cursor = newCursor
+        if (keys.length > 0) {
+            await redis.del(...keys)
+        }
+    } while (cursor !== '0')
+}
+
 export const syncRedisToMongo = async () => {
     try {
+        await deleteKeysByPattern('fetchLog:*')
+
         const walletKeys = await redis.keys(REDIS_WALLET_KEY('*'))
         const walletBulkOps = []
 
@@ -57,9 +70,8 @@ export const syncRedisToMongo = async () => {
         }
 
         for (const key of callerIdStoreKeys) {
-            const redisCallerIdStores = await redis.lrange(key, 0, -1)
-
-            if (!redisCallerIdStores.length) continue
+            const redisCallerIdStores = await redis.hget(key, '*')
+            if (!redisCallerIdStores) continue
 
             for (const store of redisCallerIdStores) {
                 const callerIdStore = JSON.parse(store) as ICallerIdStore

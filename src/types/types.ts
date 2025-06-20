@@ -48,6 +48,14 @@ export interface IEmailJob {
     html: string
 }
 
+export interface IFileProcessingJob {
+    callerIds: string[]
+    filePath: string
+    redisFileKey: string
+    SFileId: string
+    fileOriginalname: string
+}
+
 export interface IcallerIdsToStoreQueue {
     callerIds: []
     userId: string

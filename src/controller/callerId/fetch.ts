@@ -22,11 +22,9 @@ import {
 
 export default async function fetchCalllerId(req: Request, res: Response, next: NextFunction) {
     try {
-        // 1. Validate
         const { id, storeId } = req.params
         if (!id || !storeId) return httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.BAD_REQUEST.message)
 
-        // 2. Get store from cache or DB
         const redisStoreKey = REDIS_USERS_STORE_KEY(storeId)
         let store = await redis.get(redisStoreKey)
         if (!store) {
@@ -37,7 +35,6 @@ export default async function fetchCalllerId(req: Request, res: Response, next: 
 
         const parsedStore = JSON.parse(store) as IStore
 
-        // 3. Get user from cache or DB
         const userKey = REDIS_USERS_BY_STORE_KEY(storeId)
         let user = await redis.get(userKey)
         if (!user) {
@@ -48,14 +45,12 @@ export default async function fetchCalllerId(req: Request, res: Response, next: 
 
         const parsedUser = JSON.parse(user) as IUser
 
-        // 4. Prepare keys
         const email = parsedUser.email
         const redisIndexKey = REDIS_CALLERID_INDEX_KEY(email)
         const redisCallerKey = REDIS_CALLERID_KEY(email)
         const redisWalletKey = REDIS_WALLET_KEY(email)
         const stateCode = quicker.extractStatusCode(id)
 
-        // 5. Get callerIdStore
         const callerIdStr = await redis.hget(redisCallerKey, String(stateCode))
         let callerIdStore: ICallerIdStore
 
@@ -64,10 +59,9 @@ export default async function fetchCalllerId(req: Request, res: Response, next: 
             const match = freshStores.find((s) => s.statusCodes.includes(stateCode))
             if (!match) return httpResponse(req, res, responseMessage.BAD_REQUEST.code, responseMessage.BAD_REQUEST.message)
 
-            // Save all stores to Redis hash
             await Promise.all(
                 freshStores.map(
-                    (store) => redis.hset(redisCallerKey, store.statusCodes[0], JSON.stringify(store)) // Simplify as needed
+                    (store) => redis.hset(redisCallerKey, store.statusCodes[0], JSON.stringify(store))
                 )
             )
 
@@ -76,7 +70,6 @@ export default async function fetchCalllerId(req: Request, res: Response, next: 
             callerIdStore = JSON.parse(callerIdStr) as ICallerIdStore
         }
 
-        // 6. Get and update index
         let index = Number(await redis.hget(redisIndexKey, String(stateCode))) || 0
 
         const callerIdToSend = callerIdStore.callerIds[index]
@@ -84,7 +77,6 @@ export default async function fetchCalllerId(req: Request, res: Response, next: 
         callerIdStore.fetchRequests++
         parsedStore.fetchRequests += 1
 
-        // 7. Get wallet
         const walletStr = await redis.get(redisWalletKey)
         let wallet
 
@@ -101,16 +93,14 @@ export default async function fetchCalllerId(req: Request, res: Response, next: 
         }
         wallet.balance -= Number(config.COST_PER_CALLERID_FETCH)
 
-        // 9. Save updates in parallel
         await Promise.all([
             redis.hset(redisCallerKey, stateCode, JSON.stringify(callerIdStore)),
             redis.hset(redisIndexKey, stateCode, index.toString()),
             redis.set(redisWalletKey, JSON.stringify(wallet)),
             redis.set(redisStoreKey, JSON.stringify(parsedStore)),
-            redis.rpush(`fetchLog:${email}`, JSON.stringify({ ip: req.ip, time: Date.now() }))
         ])
 
-        httpResponse(req, res, responseMessage.SUCCESS.code, callerIdToSend, null, 'custom')
+        httpResponse(req, res, responseMessage.SUCCESS.code, callerIdToSend, null, 'custom', false)
     } catch (error) {
         httpError(next, error, req, responseMessage.INTERNAL_SERVER_ERROR.code)
         return
