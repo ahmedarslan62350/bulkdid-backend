@@ -106,14 +106,23 @@ export default async function (req: Request, res: Response, next: NextFunction) 
 
             await Promise.all([store.save(), SFile.save(), wallet.save()])
 
-            await fileProcessingQueue.add('process-file-job', {
-                callerIds,
-                filePath: SFilePath,
-                redisFileKey,
-                SFileId: SFile._id,
-                fileOriginalname: file.originalname
-            })
-
+            await fileProcessingQueue.add(
+                'process-file-job',
+                {
+                    callerIds,
+                    filePath: SFilePath,
+                    redisFileKey,
+                    SFileId: SFile._id,
+                    fileOriginalname: file.originalname
+                },
+                {
+                    attempts: 5,
+                    backoff: {
+                        type: 'exponential',
+                        delay: 5000
+                    }
+                }
+            )
         }
 
         if (role === 'fetching' || role === 'both') {

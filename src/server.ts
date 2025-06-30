@@ -10,7 +10,7 @@ void (async () => {
     try {
         // DATABASE_CONNECTION
         const dbConnection = await databaseService.connect()
-        initRateLimitter(dbConnection)
+        initRateLimitter()
 
         logger.info('RATE_LIMITER_INITIATED')
 
