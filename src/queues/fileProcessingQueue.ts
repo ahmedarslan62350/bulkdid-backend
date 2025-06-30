@@ -2,16 +2,17 @@ import { Queue, Worker } from 'bullmq'
 import { redisConnection } from '../config/redis'
 import logger from '../utils/logger'
 import { FileModel } from '../models/File' // Mongoose model
-import { IFileProcessingJob } from '../types/types'
+import { IFile, IFileProcessingJob } from '../types/types'
 import { handleDidsRes } from '../utils/handelChecking'
 import { writeNoromboFile } from '../utils/writeNoromboFile'
+import { redis } from '../service/redisInstance'
 
 export const fileProcessingQueue = new Queue('process-file', { connection: redisConnection })
 
 export const fileProcessingWorker = new Worker(
     'process-file',
     async (job) => {
-        const { callerIds, filePath, SFileId } = job.data as IFileProcessingJob
+        const { callerIds, filePath, SFileId, redisFileKey } = job.data as IFileProcessingJob
 
         try {
             logger.info(`Processing file job for ID: ${SFileId}`)
@@ -31,6 +32,19 @@ export const fileProcessingWorker = new Worker(
                 return
             }
 
+            try {
+                const redisFile = await redis.get(redisFileKey)
+                if (redisFile) {
+                    const file = JSON.parse(redisFile) as IFile
+                    file.state = 'completed'
+                    file.path = pathToSave
+                    await redis.set(redisFileKey, JSON.stringify(file))
+                }
+            } catch (error: unknown) {
+                const err = error as Error
+                logger.error('No file in redis', err)
+            }
+
             SFile.state = 'completed'
             SFile.path = pathToSave
 
@@ -42,6 +56,6 @@ export const fileProcessingWorker = new Worker(
         }
     },
     {
-        connection: redisConnection,
+        connection: redisConnection
     }
 )

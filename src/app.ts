@@ -48,19 +48,19 @@ app.use(urlencoded({ extended: true }))
 app.use(expressMongoSanitize())
 
 // ROUTES
-app.post('api/v1/db', rateLimit, async () => {
+app.post('/db', rateLimit, async () => {
     await populateStates()
 })
-app.use('api/v1/auth', rateLimit, authRouter)
-app.use('api/v1/file', rateLimit, isAuthenticated, fileRouter)
-app.use('api/v1/wallet', rateLimit, isAuthenticated, walletRouter)
-app.use('api/v1/user-store', rateLimit, isAuthenticated, userStoreRouter)
-app.use('api/v1/profile', rateLimit, isAuthenticated, profileRouter)
-app.use('api/v1/admin', rateLimit, isAuthenticated, isAdmin, adminRouter)
-app.use('api/v1/analytics', rateLimit, isAuthenticated, isAdmin, analyticsRouter)
-app.use('api/v1/server', rateLimit, isAuthenticated, isAdmin, serverRouter)
-app.use('api/v1/bank', rateLimit, bankRouter)
-app.use('api/v1/callerId', callerIdRouter)
+app.use('/auth', rateLimit, authRouter)
+app.use('/file', rateLimit, isAuthenticated, fileRouter)
+app.use('/wallet', rateLimit, isAuthenticated, walletRouter)
+app.use('/user-store', rateLimit, isAuthenticated, userStoreRouter)
+app.use('/profile', rateLimit, isAuthenticated, profileRouter)
+app.use('/admin', rateLimit, isAuthenticated, isAdmin, adminRouter)
+app.use('/analytics', rateLimit, isAuthenticated, isAdmin, analyticsRouter)
+app.use('/server', rateLimit, isAuthenticated, isAdmin, serverRouter)
+app.use('/bank', rateLimit, bankRouter)
+app.use('/callerId', callerIdRouter)
 app.use('', rateLimit, router)
 
 app.post('/db/populate', rateLimit, async (req, res) => {
